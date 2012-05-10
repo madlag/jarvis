@@ -1,4 +1,6 @@
 # Example package with a console entry point
+import sys
+
 import mainloop
 import sys
 import traceback
@@ -9,6 +11,7 @@ from PyQt4 import QtCore
 ml = None
 
 def main():
+
     try:
         global ml
         parser = argparse.ArgumentParser(description='Process some integers.')
@@ -72,3 +75,6 @@ def testunit_result(result):
         error(err[1])
         break
     
+
+if __name__ == "__main__":
+    main()

@@ -38,6 +38,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         QtOpenGL.QGLWidget.__init__(self, parent)
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.timer = Qt.QTimer()
+        self.timer.setInterval(40)
         self.camera = None
 
     def initializeGL (self):
@@ -49,7 +50,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.viewer.addEventHandler(osgViewer.StatsHandler())
         self.viewer.addEventHandler(osgViewer.HelpHandler())
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout ()"), self.updateGL)
-        self.timer.start(0)
+        self.timer.start(40)
 
     def embedInContext (self):
         """create a osg.GraphicsWindow for a Qt.QWidget window"""

@@ -11,7 +11,7 @@ class QTDisplay(QtCore.QObject):
         QtCore.QObject.__init__(self)
         self.app = QtGui.QApplication(sys.argv)
         self.jm = qt.JarvisMain()
-        self.jm.raise_()
+#        self.jm.raise_()
 
         # create a root node
         node = osg.Group()

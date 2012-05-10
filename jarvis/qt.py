@@ -44,7 +44,7 @@ class JarvisMain(QtGui.QWidget):
                 
     def initUI(self):        
         self.setWindowTitle('Icon')
-        WIDTH=480
+        WIDTH=320
         HEIGHT=1024
         self.setGeometry(1440 - WIDTH, 0, WIDTH, 1024)
 #        self.setWindowIcon(QtGui.QIcon('web.png'))
@@ -104,7 +104,7 @@ class JarvisMain(QtGui.QWidget):
 def main():    
     app = QtGui.QApplication(sys.argv)
     ex = JarvisMain()
-    ex.raise_()
+#    ex.raise_()
 
 
     # create a root node
