@@ -52,7 +52,6 @@ class RollbackImporter:
            name = copy.copy(result.__name__)
                        
         if "lxml" in name:
-            print result.__file__
             return result
 
         # Remember import in the right order
