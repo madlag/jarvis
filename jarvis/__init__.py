@@ -1,6 +1,6 @@
 # Example package with a console entry point
 import sys
-
+from lxml import etree
 import mainloop
 import sys
 import traceback
@@ -23,8 +23,9 @@ def main():
         ml = mainloop.MainLoop(args.module)
         
         display = qtdisplay.QTDisplay(ml)
-
+        print "TEST1", display
         ml.setdisplay(display)
+        print "TEST2"
 
         display.launch()
 
@@ -49,16 +50,23 @@ def debug(*args):
 def error(*args):
     try:
         global ml
-        ml.display.errorprint(*args)
+        d = " ".join(map(lambda x: str(x), args))
+#        d = d.split("\n")
+#        d.reverse()
+#        d = "\n".join(d)
+        ml.display.errorprint(d)
     except Exception, e:
         print traceback.format_exc(e)
         pass
 
-def debug_dir(object, filt):
+def debug_dir(object, filt = None):
     debug("debug_dir", object, filt)   
-    for k in dir(object):
-        if filt in k.lower():
+    for k in dir(object):        
+        if filt == None or filt in k.lower():
             debug(k)    
+
+def debug_xml(*args):
+    debug(*(list(args[:-1]) + [etree.tostring(args[-1], pretty_print = True)]))
 
 def show(osgdata):
     try:
@@ -70,8 +78,23 @@ def show(osgdata):
 
     return
 
+def get_osg_viewer():
+    global ml
+    return ml.display.get_osg_viewer()
+
+def setlooptime(loop_time):
+    try:
+        global ml
+        ml.display.setlooptime(loop_time)
+    except Exception, e:
+        print traceback.format_exc(e)
+        pass
+
+    return
+
 def testunit_result(result):
     for err in result.errors:
+        print err
         error(err[1])
         break
     

@@ -7,6 +7,7 @@ import codecs
 import osgqt
 import osgDB
 import osg
+import shutil
 
 class MyTextEdit(QtGui.QTextEdit):
     def __init__(self, text, father):
@@ -17,6 +18,7 @@ class MyTextEdit(QtGui.QTextEdit):
 class JarvisMain(QtGui.QWidget):
     
     def __init__(self):
+        self.osg_enable = True
         super(JarvisMain, self).__init__()
         
         self.initUI()
@@ -36,7 +38,7 @@ class JarvisMain(QtGui.QWidget):
         editor.setMinimumHeight(height)
         return editor
 
-    def createOSG(self, width, height):
+    def createOSG(self, width, height):        
         osgWidget = osgqt.PyQtOSGWidget(self)
         osgWidget.setMinimumWidth(width)
         osgWidget.setMinimumHeight(height)
@@ -44,7 +46,7 @@ class JarvisMain(QtGui.QWidget):
                 
     def initUI(self):        
         self.setWindowTitle('Icon')
-        WIDTH=320
+        WIDTH=480
         HEIGHT=1024
         self.setGeometry(1440 - WIDTH, 0, WIDTH, 1024)
 #        self.setWindowIcon(QtGui.QIcon('web.png'))
@@ -68,11 +70,13 @@ class JarvisMain(QtGui.QWidget):
 
         self.error = self.createEditor("", WIDTH, 300)
         self.debug = self.createEditor("", WIDTH, 300)
-        self.osgView = self.createOSG(WIDTH, int(WIDTH * 9 / 16.0))
+        if self.osg_enable:
+            self.osgView = self.createOSG(WIDTH, int(WIDTH * 9 / 16.0))
 
         self.rightBox.addWidget(self.error, 0, Qt.AlignRight)
         self.rightBox.addWidget(self.debug, 0, Qt.AlignRight)
-        self.rightBox.addWidget(self.osgView, 0, Qt.AlignRight)
+        if self.osg_enable:
+            self.rightBox.addWidget(self.osgView, 0, Qt.AlignRight)
 
 #        editor.textChanged.connect(self.display)
 #        editor.wheelEvent.connect(self.wheelEvent)
@@ -80,10 +84,46 @@ class JarvisMain(QtGui.QWidget):
         self.filename = None
         self.show()
 
+    def atomic_write(self, filename, text):
+        f = open(filename + ".tmp", "w")
+        f.write(text)
+        f.close()
+        shutil.move(filename + ".tmp", filename)        
+
+    def debug_text(self, text):
+#        print "DEBUG TEXT", text
+        if text == None:
+            text = ""
+            self.debug.clear()
+        else:            
+            self.debug.append(text)
+            text = self.debug.toPlainText()
+
+        self.atomic_write("/tmp/debug.txt", text)
+        
+
+    def error_text(self, text):
+#        print "ERROR TEXT", text
+        if text == None:
+            text = ""
+            self.error.clear()
+        else:            
+            self.error.append(text)
+            text = self.error.toPlainText()
+
+        self.atomic_write("/tmp/error.txt", text)
+
+        self.error.setText(text)
 
     def setSceneData(self, data):
-        self.osgView.viewer.setSceneData(data)
-        
+        self.osgView.setSceneData(data)
+
+    def setLoopTime(self, loopTime):
+        self.osgView.setLoopTime(loopTime)
+
+    def get_osg_viewer(self):
+        return self.osgView.get_osg_viewer()
+
     def file_dialog(self):
         fd = QtGui.QFileDialog(self)
         filename = fd.getOpenFileName()
@@ -96,13 +136,15 @@ class JarvisMain(QtGui.QWidget):
             s.write(unicode(self.ui.editor_window.toPlainText()))
             s.close()
 
-
+    def run_command(self):
+        self.fun()
 
 
 
 
 def main():    
     app = QtGui.QApplication(sys.argv)
+    
     ex = JarvisMain()
 #    ex.raise_()
 

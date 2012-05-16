@@ -40,6 +40,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.timer = Qt.QTimer()
         self.timer.setInterval(40)
         self.camera = None
+        self.startTime = time.time()
+        self.loopTime = 10.0
 
     def initializeGL (self):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
@@ -52,6 +54,9 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout ()"), self.updateGL)
         self.timer.start(40)
 
+    def setLoopTime(self, loopTime):
+        self.loopTime = loopTime
+
     def embedInContext (self):
         """create a osg.GraphicsWindow for a Qt.QWidget window"""
         gw = osgViewer.GraphicsWindowEmbedded(0,0,self.width(),self.height())
@@ -61,7 +66,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         """create a opengl context (currently WindowData classes are not wrapped so we can not inherrit the windowdata) """
         ds = osg.DisplaySettings_instance()
         if False:
-            traits = osg.Traits()
+            traits = osg.GraphicsContext.Traits()
+            print traits
             traits.readDISPLAY()
             if (traits.displayNum<0): traits.displayNum = 0
 
@@ -71,19 +77,24 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             traits.y = self.y()
             traits.width = self.width()
             traits.height = self.height()
-            traits.alpha = ds.getMinimumNumAlphaBits()
-            traits.stencil = ds.getMinimumNumStencilBits()
+            traits.alpha = 8 #ds.getMinimumNumAlphaBits()
+            traits.stencil = 8 #ds.getMinimumNumStencilBits()
             traits.windowDecoration = False
             traits.doubleBuffer = True
-            traits.sampleBuffers = ds.getMultiSamples()
-            traits.samples = ds.getNumMultiSamples()
+            traits.sampleBuffers = 4 #ds.getMultiSamples()
+            traits.samples = 4 #ds.getNumMultiSamples()
         gw = osgViewer.GraphicsWindowEmbedded()
         return gw
 
     def createViewer(self):
         """create a osgViewer.Viewer and set the viewport, camera and previously created graphical context """
         viewer = osgViewer.Viewer()
+        self.resetCamera(viewer)
+        return viewer
+
+    def resetCamera(self, viewer):
         camera = viewer.getCamera()
+
         camera.setViewport(osg.Viewport(0,0, self.width(), self.height()))
 
         CAMERA_ANGLE = 45.0
@@ -101,9 +112,11 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             raise Exception("GraphicsWindow not yet created")
         camera.setGraphicsContext(self.gw)
         self.camera = camera
-
-        return viewer
-
+    
+    def heightForWidth(self, w):
+        ret = int(w * 9.0 / 16.0)
+        return ret
+        
     def createViewerNew(self):
         # Standard size
         size = (self.width(), self.height())
@@ -128,8 +141,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
         position = cameraPosition
         camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE, screen_ratio, 0.1, 100.0)
-#        camera.getOrCreateStateSet().setAttributeAndModes(osg.BlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA))
-#        camera.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
+        camera.getOrCreateStateSet().setAttributeAndModes(osg.BlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA))
+        camera.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
         material = osg.Material()
         color = osg.Vec4(1.0,1.0,1.0,1.0)
         material.setDiffuse(osg.Material.FRONT_AND_BACK, color)
@@ -159,21 +172,23 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         return viewer
 
     def setSceneData(self, data):
-        print "setSceneData"
-        if self.camera == None:
-            return
-        if self.camera.getNumChildren() == 1:
-            self.camera.removeChild(0)
-        if scene_data != None:
-            self.camera.addChild(scene_data)
-
+        self.startTime = time.time()
+        if data  != None:
+            self.viewer.setSceneData(data)
+    
+    def get_osg_viewer(self):
+        return self.viewer
     
     def resizeGL( self, w, h ):
-        print "GL resized ", w, h
         self.gw.resized(0,0,w,h)
+        self.resetCamera(self.viewer)
 
     def paintGL (self):
-        self.viewer.frame()
+        t = time.time() - self.startTime
+        if t >= self.loopTime:
+            self.startTime = time.time()
+            t = 0.0
+        self.viewer.frameAtTime(t)
 
     def mousePressEvent( self, event ):
         """put the qt event in the osg event queue"""
