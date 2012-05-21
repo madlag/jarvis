@@ -9,4 +9,4 @@ exit 0;
 while [ 1 ];
 do
     exit 0;
-donex
+done

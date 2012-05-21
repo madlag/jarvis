@@ -108,6 +108,17 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         up = osg.Vec3d(0,1,0)
         camera.setViewMatrixAsLookAt(eye, center, up)
 
+        camera.getOrCreateStateSet().setAttributeAndModes(osg.BlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA))
+        camera.getOrCreateStateSet().setMode(GL.GL_DEPTH_TEST, False)
+        camera.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
+        material = osg.Material()
+        color = osg.Vec4(1.0,1.0,1.0,1.0)
+        material.setDiffuse(osg.Material.FRONT_AND_BACK, color)
+        material.setAmbient(osg.Material.FRONT_AND_BACK, color)
+        camera.getOrCreateStateSet().setAttributeAndModes(material)
+        camera.setClearColor(osg.Vec4(0,0,0,0))
+        camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
         camera.setGraphicsContext(self.gw)
@@ -140,7 +151,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setViewport(osg.Viewport(0,0,size[0], size[1]))
         camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
         position = cameraPosition
-        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE, screen_ratio, 0.1, 100.0)
+        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE, screen_ratio, 0.01, 100.0)
         camera.getOrCreateStateSet().setAttributeAndModes(osg.BlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA))
         camera.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
         material = osg.Material()
@@ -149,7 +160,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         material.setAmbient(osg.Material.FRONT_AND_BACK, color)
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
-#        camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+        camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
         eye = osg.Vec3d(cameraPosition[0], cameraPosition[1], cameraPosition[2])
         center = osg.Vec3d(0,0,0)
