@@ -1,31 +1,26 @@
-import compileall
+import os
+import os.path
 import sys
-import curses
 import time
 import traceback
-import os
-import threading
 from PyQt4 import QtCore
-import os.path
-import copy
-import __builtin__
-import inspect
 import jarvis
+import rollbackimporter
 
 class Display():
     def __init__(self):
+        pass
+
+    def init(self):
+        pass
+
+    def destroy(self):
         pass
 
     def start(self):
         pass
     
     def finish(self):
-        pass
-
-    def clear(self):
-        pass
-
-    def validate(self):
         pass
 
     def debugprint(self, *args):
@@ -36,108 +31,22 @@ class Display():
         info = " ".join(map(lambda x: str(x), args)) + "\n"
         print "INFO", info
 
-class RollbackImporter:
-    def __init__(self):
-        "Creates an instance and installs as the global importer"
-        self.previousModules = sys.modules.copy()
-        self.realImport = __builtin__.__import__
-        __builtin__.__import__ = self._import
-        self.newModules = []
-#        print "PREVIOUS", self.previousModules
-        
-    def _import(self, name, globals=None, locals=None, fromlist=[], level = -1):
-        # Apply real import
-        result = apply(self.realImport, (name, globals, locals, fromlist, level))
-
-#        print "name = ", name, result.__name__
-        if len(name) <= len(result.__name__):
-           name = copy.copy(result.__name__)
-
-        black_list = [] #["stashy", "sentry", "raven", "logging", "warnings"]
-        
-        for b in black_list:
-            if b in name:
-                return result
-
-        # Remember import in the right order
-        if name not in self.previousModules:
-            # Only remember once
-            if name not in self.newModules:                            
-                self.newModules += [name]
-        return result
-
-    def cleanup(self, display):
-        for name in self.newModules:
-            # Force reload when modname next imported
-            try:
-                reload(sys.modules[name])
-            except TypeError:
-                pass
-            except Exception, e:
-                display.errorprint("ERROR on ", traceback.format_exc(e), name)
-#        self.newModules = []
-                
-    def uninstall(self):
-        __builtin__.__import__ = self.realImport
-
-class CursesDisplay():
-    def __init__(self):
-        pass
-    
-    def start(self):
-        self.stdscr = curses.initscr()
-        
-        begin_x = 0
-        begin_y = 0
-        height = 25
-        width = 0
-        self.status_window = curses.newwin(height, width, begin_y, begin_x)
-        begin_y += height
-        height = 100
-        self.debug_window = curses.newwin(height, width, begin_y, begin_x)
-            
-    def finish(self):
-        curses.nocbreak()
-        self.status_window.keypad(0)
-        curses.echo()
-        curses.endwin()
-
-    def clear(self):
-        self.status_window.clear()
-        self.debug_window.clear()
-
-    def validate(self):
-        self.status_window.refresh()
-        self.debug_window.refresh()
-
-    def debugprint(self, *args):
-        info = " ".join(map(lambda x: str(x), args)) + "\n"
-        self.status_window.clear()
-        self.debug_window.addstr(info)
-
-    def errorprint(self, *args):        
-        error = " ".join(map(lambda x: str(x), args)) + "\n"
-        self.status_window.clear()
-        self.status_window.addstr(error)
-
         
 class MainLoop(QtCore.QThread):
     def __init__(self, module, display = None):
         QtCore.QThread.__init__(self)
-
 
         self.module_function_name = module
         self.finished = False
         self.display = display
         self.filedates = {}
         self.module = None
-#        self.rollbackImporter = None
 
         modName = self.module_function_name
         modNameParts = modName.split(".")
         self.module_name = ".".join(modNameParts[:-1])
         
-        self.rollbackImporter = RollbackImporter()
+        self.rollbackImporter = rollbackimporter.RollbackImporter()
         self.watchfiles = {}
         # This flag says if last test was runned or not yet finished
         self.run_finished = True
@@ -172,7 +81,6 @@ class MainLoop(QtCore.QThread):
         self.filedates[filename] = lastdate            
 
         return modified, checkedfile
-
 
     def checkreloadmodule(self, module):
         checkedfiles = []
@@ -299,7 +207,7 @@ class MainLoop(QtCore.QThread):
 
         self.run_finished = False
 
-        self.display.clear()
+        self.display.start()
 
         if self.rollbackImporter:
             self.rollbackImporter.cleanup(self.display)
@@ -313,9 +221,9 @@ class MainLoop(QtCore.QThread):
                 self.runloop()
             except Exception, e:
                 if self.display != None:
-                    self.display.clear()
+                    self.display.start()
                     self.display.errorprint(traceback.format_exc(e))
-                    self.display.validate()
+                    self.display.finish()
             time.sleep(0.5)
                                                 
     def run(self):
@@ -326,7 +234,7 @@ class MainLoop(QtCore.QThread):
         f.close()        
 
         try:
-            a = self.run_()
+            self.run_()
         except KeyboardInterrupt:
             pass
         except Exception, e:

@@ -1,94 +1,63 @@
-import qt
 import sys
+import qt
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from PyQt4 import QtOpenGL
-import osg
-import osgDB
 
+# Used to wrap calls to QTDisplay missing functions, to proxy it to the JarvisMain Qt Widget
+class CallWrapper:
+    def __init__(self, parent, name):
+        self.parent = parent
+        self.name = name
 
+    def __call__(self, *args, **kwargs):
+        self.parent.message(self.name, *args, **kwargs)
+        
 class QTDisplay(QtCore.QObject):
+    """This class act as a proxy between the rest of the world and the actual qt widgets"""
+
+    # Message signal handler : it's used to pass all messages to Qt widgets
+    message_available = QtCore.pyqtSignal(object)
+        
     def __init__(self, mainloop):
+        # Initialize this as as Qt object
         QtCore.QObject.__init__(self)
+        # Create the application
         self.app = QtGui.QApplication(sys.argv)
+        
+        # Setup OpenGL to use multisampling for antialiasing
         glf = QtOpenGL.QGLFormat.defaultFormat()
         glf.setSampleBuffers(True)
         glf.setSamples(4)
         QtOpenGL.QGLFormat.setDefaultFormat(glf)
 
-        self.jm = qt.JarvisMain()
+        # Create the main widget
+        self.jarvismain = qt.JarvisMain()
 #        self.jm.raise_()
 
-        self.debug_available.connect(self.jm.debug_text)
-        self.error_available.connect(self.jm.error_text)
-        self.osg_available.connect(self.jm.setSceneData)
-        self.set_loop_time.connect(self.jm.setLoopTime)
-        self.run_command.connect(self.jm.run_command)
+        # Connect the message to the main widget
+        self.message_available.connect(self.jarvismain.message)
 
+        # Start the loop once the Qt App was created
         mainloop.start()
 
-        self.lastdebug = ""
-        self.lasterror = ""
-
-        self.debug = ""
-        self.error = ""
-        
-    def start(self):
-        pass
-    
-    def finish(self):
-        pass
-
-    def clear(self):
-#        self.debug = ""
-#        self.error = ""
-        self.error_available.emit(None)
-        self.debug_available.emit(None)
-
-    def debugprint(self, *args):
-        info = " ".join(map(lambda x: str(x), args)) + "\n"
-        self.debug_available.emit(info)
-
-#        print "DEBUGPRINT", info
-#        self.debug += info
-
-    def errorprint(self, *args):
-        info = " ".join(map(lambda x: str(x), args)) + "\n"
-        self.error_available.emit(info)
-#        self.error += info
-
-    def setlooptime(self, loop_time):
-        self.set_loop_time.emit(loop_time)
-
-    def runcommand(self, fun):        
-        self.jm.fun = fun
-        self.run_command.emit()
-
-    debug_available = QtCore.pyqtSignal(object)
-    error_available = QtCore.pyqtSignal(object)
-    osg_available = QtCore.pyqtSignal(object)
-    set_loop_time = QtCore.pyqtSignal(object)
-    run_command = QtCore.pyqtSignal()
-
-    def validate(self):
-        pass
-#        if self.lastdebug != self.debug:
-#            print "EMITTING"
-#            self.jm.debug.setText(self.debug)
-#        print "VALIDATE", self.debug
-#        self.debug_available.emit(self.debug)
-#        self.lastdebug = self.debug
-
-#        if self.lasterror != self.error:
-#        self.error_available.emit(self.error)
-#        self.lasterror = self.error
-
-    def osgprint(self, data):
-        self.osg_available.emit(data)
-
-    def get_osg_viewer(self):
-        return self.jm.get_osg_viewer()
-
-    def launch(self):
+    # Initalize : launch the app
+    def init(self):
         sys.exit(self.app.exec_())
 
+    # Destroy the app
+    def destroy(self):
+        pass
+
+    # Get the inner osg viewer
+    def getosgviewer(self):
+        return self.jarvismain.getosgviewer()
+
+    # For all other display function calls, act as a proxy to qt for calls
+    def message(self, fun, *args, **kwargs):
+        self.message_available.emit({"fun":fun, "args":args, "kwargs":kwargs})
+
+    # Catch the missing function calls
+    def __getattr__(self, name):
+        return CallWrapper(self, name)
+                

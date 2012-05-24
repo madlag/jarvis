@@ -1,9 +1,8 @@
-# Example package with a console entry point
+import sys
 import os
 import argparse
 import traceback
 from lxml import etree
-import sys
 
 ml = None
 
@@ -19,7 +18,6 @@ def get_home():
         
     return jarvis_home
 
-
 def run(modulename):
     global ml
     import qtdisplay
@@ -33,14 +31,14 @@ def run(modulename):
         ml.setdisplay(display)
         print "TEST2"
 
-        display.launch()
+        display.init()
         
     except KeyboardInterrupt:
         pass
     except Exception, e:
         print traceback.format_exc(e)
     finally:
-        display.finish()    
+        display.destroy()
         
 
 def main():
@@ -51,26 +49,17 @@ def main():
     args = parser.parse_args()
     run(args.module)
 
+
 def debug(*args):
-    try:
-        global ml
+    global ml
+    if ml != None and ml.display != None:
         ml.display.debugprint(*args)
-    except Exception, e:
-        print traceback.format_exc(e)
-        pass
 
 def error(*args):
-    try:
-        global ml
-        d = " ".join(map(lambda x: str(x), args))
-#        d = d.split("\n")
-#        d.reverse()
-#        d = "\n".join(d)
-        ml.display.errorprint(d)
-    except Exception, e:
-        print traceback.format_exc(e)
-        pass
-
+    global ml
+    if ml != None and ml.display != None:
+        ml.display.errorprint(*args)
+    
 def debug_dir(object, filt = None):
     debug("debug_dir", object, filt)   
     for k in dir(object):        
@@ -80,36 +69,25 @@ def debug_dir(object, filt = None):
 def debug_xml(*args):
     debug(*(list(args[:-1]) + [etree.tostring(args[-1], pretty_print = True)]))
 
-def show(osgdata):
-    try:
-        global ml
-        ml.display.osgprint(osgdata)
-    except Exception, e:
-        print traceback.format_exc(e)
-        pass
-
-    return
-
-def get_osg_viewer():
-    global ml
-    return ml.display.get_osg_viewer()
-
-def setlooptime(loop_time):
-    try:
-        global ml
-        ml.display.setlooptime(loop_time)
-    except Exception, e:
-        print traceback.format_exc(e)
-        pass
-
-    return
-
 def testunit_result(result):
     for err in result.errors:
-        print err
         error(err[1])
-        break
+
+def show(osgdata):
+    global ml
+    if ml != None and ml.display != None:
+        ml.display.osgprint(osgdata)
     
+def get_osg_viewer():
+    global ml
+    if ml != None and ml.display != None:
+        return ml.display.getosgviewer()
+
+def setlooptime(loop_time):
+    global ml
+    if ml != None and ml.display != None:
+        ml.display.setlooptime(loop_time)
+
 
 if __name__ == "__main__":
     main()

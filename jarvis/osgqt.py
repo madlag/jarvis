@@ -189,7 +189,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         if data  != None:
             self.viewer.setSceneData(data)
     
-    def get_osg_viewer(self):
+    def getosgviewer(self):
         return self.viewer
     
     def resizeGL( self, w, h ):

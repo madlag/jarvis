@@ -23,6 +23,19 @@ class JarvisMain(QtGui.QWidget):
         
         self.initUI()
 
+    def message(self, object):
+        fun_name = object["fun"]
+        args = object.get("args", [])
+        kwargs = object.get("kwargs", {})
+        getattr(self, fun_name)(*args, **kwargs)
+
+    def start(self):
+        self.debug.clear()
+        self.error.clear()
+
+    def finish(self):
+        pass
+    
     def display(self):
         print self.editor.toPlainText()
 
@@ -90,39 +103,31 @@ class JarvisMain(QtGui.QWidget):
         f.close()
         shutil.move(filename + ".tmp", filename)        
 
-    def debug_text(self, text):
-#        print "DEBUG TEXT", text
-        if text == None:
-            text = ""
-            self.debug.clear()
-        else:            
-            self.debug.append(text)
-            text = self.debug.toPlainText()
+    def debugprint(self, *args):
+        text = " ".join(map(lambda x: str(x), args)) + "\n"
+        self.debug.append(text)
+        text = self.debug.toPlainText()
 
         self.atomic_write("/tmp/debug.txt", text)
         
-
-    def error_text(self, text):
-#        print "ERROR TEXT", text
-        if text == None:
-            text = ""
-            self.error.clear()
-        else:            
-            self.error.append(text)
-            text = self.error.toPlainText()
+    def errorprint(self, *args):
+        text = " ".join(map(lambda x: str(x), args)) + "\n"
+        self.error.append(text)
+        text = self.error.toPlainText()
 
         self.atomic_write("/tmp/error.txt", text)
 
-        self.error.setText(text)
-
-    def setSceneData(self, data):
+    def osgprint(self, data):
         self.osgView.setSceneData(data)
 
-    def setLoopTime(self, loopTime):
+    def setlooptime(self, loopTime):
         self.osgView.setLoopTime(loopTime)
 
-    def get_osg_viewer(self):
-        return self.osgView.get_osg_viewer()
+    def runcommand(self, fun):
+        fun()
+
+    def getosgviewer(self):
+        return self.osgView.getosgviewer()
 
     def file_dialog(self):
         fd = QtGui.QFileDialog(self)
@@ -135,10 +140,6 @@ class JarvisMain(QtGui.QWidget):
             s = codecs.open(self.filename,'w','utf-8')
             s.write(unicode(self.ui.editor_window.toPlainText()))
             s.close()
-
-    def run_command(self):
-        self.fun()
-
 
 
 
