@@ -10,6 +10,7 @@ import os.path
 import copy
 import __builtin__
 import inspect
+import jarvis
 
 class Display():
     def __init__(self):
@@ -46,14 +47,13 @@ class RollbackImporter:
         
     def _import(self, name, globals=None, locals=None, fromlist=[], level = -1):
         # Apply real import
-        result = apply(self.realImport, (name, globals, locals, fromlist))
+        result = apply(self.realImport, (name, globals, locals, fromlist, level))
 
 #        print "name = ", name, result.__name__
         if len(name) <= len(result.__name__):
            name = copy.copy(result.__name__)
 
-        black_list = ["streaming_httplib2", "stashy", "numpy", "sys", "lxml", "htmlrenderer"]
-        black_list = ["stashy"]
+        black_list = [] #["stashy", "sentry", "raven", "logging", "warnings"]
         
         for b in black_list:
             if b in name:
@@ -66,14 +66,15 @@ class RollbackImporter:
                 self.newModules += [name]
         return result
 
-    def cleanup(self):
+    def cleanup(self, display):
         for name in self.newModules:
             # Force reload when modname next imported
             try:
                 reload(sys.modules[name])
-            except Exception, e:
+            except TypeError:
                 pass
-#                print "ERROR on ", traceback.format_exc(e), name
+            except Exception, e:
+                display.errorprint("ERROR on ", traceback.format_exc(e), name)
 #        self.newModules = []
                 
     def uninstall(self):
@@ -124,6 +125,7 @@ class MainLoop(QtCore.QThread):
     def __init__(self, module, display = None):
         QtCore.QThread.__init__(self)
 
+
         self.module_function_name = module
         self.finished = False
         self.display = display
@@ -144,8 +146,9 @@ class MainLoop(QtCore.QThread):
         self.display = display
 
     def checkreloadfile(self, filename):
-#        debug = "test_" in filename
-
+#        debug = "lizard" in filename
+#        if debug:
+#            print filename
         modified = False
         try:
             filedate = os.path.getmtime(filename)
@@ -208,8 +211,21 @@ class MainLoop(QtCore.QThread):
             mod = getattr(mod, p)
         self.module = mod
 #        reload(self.module)
+
+    def modulechanged(self):
+        # Check that main module has not changed
+        testmodulepath = os.path.join(jarvis.get_home(), jarvis.TEST_MODULE_PATH)
+        testmodulename = None
         
-    def singlePrepare(self):            
+        testmodulename = open(testmodulepath).read()
+        if testmodulename != self.module_function_name:
+            self.module_function_name = testmodulename
+            print "CHANGED", testmodulename
+            return True
+        return False
+
+    def singlePrepare(self):
+        
         modified = False
         self.daemon = True
         # Check if any file was modified since last run
@@ -249,8 +265,14 @@ class MainLoop(QtCore.QThread):
 
     def runcommand(self):
         fun = getattr(self.module, self.module_function_name.split(".")[-1])
-        fun()
-        self.run_finished = True
+        try:
+            fun()
+        except Exception, e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            self.display.errorprint("%s:%s\n" % (fname, exc_tb.tb_lineno) + traceback.format_exc(e) + "\n")
+        finally:
+            self.run_finished = True
         
     def singleRun(self):
         if self.display != None:
@@ -264,33 +286,28 @@ class MainLoop(QtCore.QThread):
             first = True
         else:
             first = False
+
+        modified = self.modulechanged()
             
         self.loadMainModule()
 
-        modified = self.singlePrepare()
+        modified = modified or self.singlePrepare()
         
         if not first:
             if not modified:                
                 return
 
         self.run_finished = False
-        
-        if self.rollbackImporter:
-            self.rollbackImporter.cleanup()
-
 
         self.display.clear()
-        try:
-            self.singleRun()
-            self.display.errorprint("")                
-        except Exception, e:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            self.display.errorprint("%s:%s\n" % (fname, exc_tb.tb_lineno) + traceback.format_exc(e) + "\n")
 
-        self.display.validate()
+        if self.rollbackImporter:
+            self.rollbackImporter.cleanup(self.display)
+
+
+        self.singleRun()
                 
-    def run_(self):        
+    def run_(self):
         while(not self.finished):
             try:
                 self.runloop()
@@ -299,9 +316,15 @@ class MainLoop(QtCore.QThread):
                     self.display.clear()
                     self.display.errorprint(traceback.format_exc(e))
                     self.display.validate()
-            time.sleep(2.0)
+            time.sleep(0.5)
                                                 
     def run(self):
+        # Write the current module name to disk
+        testmodulepath = os.path.join(jarvis.get_home(), jarvis.TEST_MODULE_PATH)
+        f = open(testmodulepath, "w")
+        f.write(self.module_function_name)
+        f.close()        
+
         try:
             a = self.run_()
         except KeyboardInterrupt:

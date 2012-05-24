@@ -174,10 +174,12 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
         viewer.getCamera().setGraphicsContext(self.gw)        
 
+        viewer.setThreadingModel(osgViewer.ViewerBase.SingleThreaded)
+        
 #        viewer.setUpViewInWindow(0,0, size[0], size[1])
 #        viewer.addEventHandler(osgViewer.HelpHandler());
 #        viewer.addEventHandler(osgViewer.StatsHandler());
-#        viewer.addEventHandler(osgViewer.ThreadingHandler())
+        viewer.addEventHandler(osgViewer.ThreadingHandler())
 #        viewer.setThreadingModel(osgViewer.ViewerBase.SingleThreaded)
 
         return viewer
@@ -199,6 +201,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         if t >= self.loopTime:
             self.startTime = time.time()
             t = 0.0
+
         self.viewer.frameAtTime(t)
 
     def mousePressEvent( self, event ):

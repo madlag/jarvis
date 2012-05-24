@@ -1,26 +1,32 @@
 # Example package with a console entry point
-import sys
-from lxml import etree
-import mainloop
-import sys
-import traceback
+import os
 import argparse
-import qtdisplay
-from PyQt4 import QtCore
+import traceback
+from lxml import etree
+import sys
 
 ml = None
 
-def main():
+TEST_MODULE_PATH="testmodule.txt"
+
+def get_home():
+    jarvis_home = os.getenv("JARVIS_HOME", "/tmp/jarvis")
+    try:
+        os.makedirs(jarvis_home)
+    except OSError, e:
+        if e.errno != 17:
+            raise
+        
+    return jarvis_home
+
+
+def run(modulename):
+    global ml
+    import qtdisplay
+    import mainloop
 
     try:
-        global ml
-        parser = argparse.ArgumentParser(description='Process some integers.')
-        parser.add_argument("--nogl", default=False, action="store_true", help="disable gl window")
-        parser.add_argument("--module", metavar="NAME")
-
-        args = parser.parse_args()
-
-        ml = mainloop.MainLoop(args.module)
+        ml = mainloop.MainLoop(modulename)
         
         display = qtdisplay.QTDisplay(ml)
         print "TEST1", display
@@ -28,7 +34,6 @@ def main():
         print "TEST2"
 
         display.launch()
-
         
     except KeyboardInterrupt:
         pass
@@ -38,6 +43,13 @@ def main():
         display.finish()    
         
 
+def main():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument("--nogl", default=False, action="store_true", help="disable gl window")
+    parser.add_argument("--module", metavar="NAME")
+
+    args = parser.parse_args()
+    run(args.module)
 
 def debug(*args):
     try:
@@ -101,3 +113,4 @@ def testunit_result(result):
 
 if __name__ == "__main__":
     main()
+
