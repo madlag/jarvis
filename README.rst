@@ -1,19 +1,15 @@
-This file requires editing
+Jarvis 
 ==========================
 
-Note to the author: Please add something informative to this README *before*
-releasing your software, as `a little documentation goes a long way`_.  Both
-README.rst (this file) and NEWS.txt (release notes) will be included in your
-package metadata which gets displayed in the PyPI page for your project.
+Jarvis is a tool inspired by works of Bret Victor (http://worrydream.com/), especially his talk "Inventing on Principle" (http://www.youtube.com/watch?v=PUv66718DII).
 
-You can take a look at the README.txt of other projects, such as repoze.bfg
-(http://bfg.repoze.org/trac/browser/trunk/README.txt) for some ideas.
 
-.. _`a little documentation goes a long way`: http://www.martinaspeli.net/articles/a-little-documentation-goes-a-long-way
+Authors
+-------
+François Lagunas, CTO, Stupeflix
 
 Credits
 -------
-
 - `Distribute`_
 - `Buildout`_
 - `modern-package-template`_
