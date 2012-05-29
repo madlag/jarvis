@@ -7,6 +7,7 @@ from lxml import etree
 ml = None
 
 TEST_MODULE_PATH="testmodule.txt"
+ERROR_FILE="error.txt"
 
 def get_home():
     jarvis_home = os.getenv("JARVIS_HOME", "/tmp/jarvis")
@@ -17,6 +18,10 @@ def get_home():
             raise
         
     return jarvis_home
+
+def get_filename(key):
+    error_file = os.path.join(get_home(), key)    
+    return error_file
 
 def run(modulename):
     global ml
@@ -56,6 +61,7 @@ def debug(*args):
         ml.display.debugprint(*args)
 
 def error(*args):
+    print "ERROR PRINT", args
     global ml
     if ml != None and ml.display != None:
         ml.display.errorprint(*args)

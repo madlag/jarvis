@@ -3,7 +3,7 @@ import os.path as op
 import unittest
 import shutil
 
-import stupeflix.lizard.tasks.{{taskmodule}} as {{shorttaskmodule}}
+import {{module}} as {{shortmodule}}
 import urllib2
 import mock 
 import mox
@@ -12,7 +12,7 @@ this_dir = op.dirname(__file__)
 data_dir = op.join(this_dir, "data")
 tmp_dir = op.join(this_dir, "tmp")
 
-class Test{{TaskClassName}}(unittest.TestCase):
+class Test{{TestClassName}}(unittest.TestCase):
     def setUp(self):
         # Refresh the temporary directory
         try:
@@ -37,21 +37,21 @@ class Test{{TaskClassName}}(unittest.TestCase):
         # Activate mocks
         self.mox.ReplayAll()
 
-        store_method = {{shorttaskmodule}}.{{TaskClassName}}.store
+        store_method = {{shortmodule}}.{{ClassName}}.store
         # Mock the store function
-        {{shorttaskmodule}}.{{TaskClassName}}.store = mock.Mock()
-        taskRunner = {{shorttaskmodule}}.{{TaskClassName}}(host="https://dummy.com", secret="dummy")
+        {{shortmodule}}.{{ClassName}}.store = mock.Mock()
+        Runner = {{shortmodule}}.{{ClassName}}(host="https://dummy.com", secret="dummy")
         taskRunner.debug = True
         taskRunner.path  = tmp_dir
 
-        taskRunner.taskInfo = {"task":{"video_br":str(video_br)}}
-        ret = taskRunner.run(url)
+        task = {"url":url, "video_br":"1024k"}
+        ret = taskRunner.run(**task)
                       
         self.assertEqual(ret, ref)
 
         output = os.path.join(tmp_dir, 'out.tmp')
         convertInfo = (('out.mp4',), {'mimeType': 'video/mp4', 'filename': output})
-        self.assertEqual({{shorttaskmodule}}.{{TaskClassName}}.store.call_args, convertInfo)
+        self.assertEqual({{shortmodule}}.{{ClassName}}.store.call_args, convertInfo)
 
         videoRefFilename = self.dataFilename("convert/%s.ref.mov" % filename)
         if not op.exists(videoRefFilename):                            
@@ -64,17 +64,20 @@ class Test{{TaskClassName}}(unittest.TestCase):
         self.mox.VerifyAll()        
 
         # Reset the store function to its initial value
-        {{shorttaskmodule}}.{{TaskClassName}}.store = store_method
+        {{shortmodule}}.{{ClassName}}.store = store_method
+
+
+    def test_main(self):
+        # TODO
+        o = {{shortmodule}}.{{ClassName}}()
         
     def tearDown(self):
         self.mox.UnsetStubs()
 
-
-
 def main():
-    suite = unittest.TestLoader().loadTestsFromTestCase(Test{{TaskClassName}})
+    suite = unittest.TestLoader().loadTestsFromTestCase(Test{{TestClassName}})
     result = unittest.TextTestRunner(verbosity=2).run(suite)
-    print result
+    testunit_result(result)
 
     
 if __name__=="__main__":

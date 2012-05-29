@@ -5,12 +5,14 @@ import shutil
 
 import mock 
 import mox
+import {{module}} as {{shortmodule}}
+from jarvis import *
 
 this_dir = op.dirname(__file__)
 data_dir = op.join(this_dir, "data")
 tmp_dir = op.join(this_dir, "tmp")
 
-class Test{{ClassName}}unittest.TestCase):
+class Test{{TestClassName}}(unittest.TestCase):
     def setUp(self):
         # Refresh the temporary directory
         try:
@@ -28,6 +30,11 @@ class Test{{ClassName}}unittest.TestCase):
         
     def data_file_name(self, filename):
         return op.join(data_dir, filename)
+
+    def test_main(self):
+        # TODO
+        o = {{shortmodule}}.{{ClassName}}()
+        debug(o)
     
     def tearDown(self):
         self.mox.UnsetStubs()
@@ -36,3 +43,13 @@ class Test{{ClassName}}unittest.TestCase):
             shutil.rmtree(tmp_dir, True)
         except:
             pass
+
+        
+def main():
+    suite = unittest.TestLoader().loadTestsFromTestCase(Test{{TestClassName}})
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    testunit_result(result)
+
+    
+if __name__=="__main__":
+    main()

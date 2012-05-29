@@ -8,6 +8,7 @@ import osgqt
 import osgDB
 import osg
 import shutil
+import jarvis
 
 class MyTextEdit(QtGui.QTextEdit):
     def __init__(self, text, father):
@@ -115,7 +116,8 @@ class JarvisMain(QtGui.QWidget):
         self.error.append(text)
         text = self.error.toPlainText()
 
-        self.atomic_write("/tmp/error.txt", text)
+        error_file = jarvis.get_filename(jarvis.ERROR_FILE)
+        self.atomic_write(error_file, text)
 
     def osgprint(self, data):
         self.osgView.setSceneData(data)
