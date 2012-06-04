@@ -23,7 +23,7 @@ def get_filename(key):
     error_file = os.path.join(get_home(), key)    
     return error_file
 
-def run(modulename):
+def run(modulename, layout=None):
     global ml
     import qtdisplay
     import mainloop
@@ -31,8 +31,8 @@ def run(modulename):
     try:
         ml = mainloop.MainLoop(modulename)
         
-        display = qtdisplay.QTDisplay(ml)
-        print "TEST1", display
+        display = qtdisplay.QTDisplay(ml, layout)
+        print "TEST1", display, layout
         ml.setdisplay(display)
         print "TEST2"
 
@@ -50,10 +50,10 @@ def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument("--nogl", default=False, action="store_true", help="disable gl window")
     parser.add_argument("--module", metavar="NAME")
+    parser.add_argument("--layout", metavar="LAYOUT", default=None)
 
     args = parser.parse_args()
-    run(args.module)
-
+    run(args.module, args.layout)
 
 def debug(*args):
     global ml
