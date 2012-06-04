@@ -76,6 +76,8 @@ class Test{{TestClassName}}(unittest.TestCase):
 
 def main():
     suite = unittest.TestLoader().loadTestsFromTestCase(Test{{TestClassName}})
+    suite = filter(lambda x : str(x).startswith("test_"), suite)
+    suite = unittest.TestLoader().suiteClass(suite)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     testunit_result(result)
 

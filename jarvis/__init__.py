@@ -78,6 +78,8 @@ def debug_xml(*args):
 def testunit_result(result):
     for err in result.errors:
         error(err[1])
+    for err in result.failures:
+        error(err[1])
 
 def show(osgdata):
     global ml
@@ -94,6 +96,10 @@ def setlooptime(loop_time):
     if ml != None and ml.display != None:
         ml.display.setlooptime(loop_time)
 
+def add_watch_file(filename):
+    global ml
+    if ml != None:
+        return ml.add_watch_file(filename)
 
 if __name__ == "__main__":
     main()

@@ -51,6 +51,9 @@ class MainLoop(QtCore.QThread):
         # This flag says if last test was runned or not yet finished
         self.run_finished = True
 
+    def add_watch_file(self, filename):
+        self.watchfiles[filename] = True
+
     def setdisplay(self, display):
         self.display = display
 

@@ -2,7 +2,6 @@ from Pymacs import lisp
 import jarvis.emacs.utils as utils
 import os.path
 import os
-import time
 
 reload(utils)
 
