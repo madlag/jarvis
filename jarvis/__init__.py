@@ -1,12 +1,13 @@
-import sys
 import os
 import argparse
 import traceback
-from lxml import etree
 
 ml = None
 
+# This is the place where is stored the currently tested 'module.function' .
 TEST_MODULE_PATH="testmodule.txt"
+
+# This is the file where errors produced by calls to jarvis.command.error are written.
 ERROR_FILE="error.txt"
 
 def get_home():
@@ -32,9 +33,7 @@ def run(modulename):
         ml = mainloop.MainLoop(modulename)
         
         display = qtdisplay.QTDisplay(ml)
-        print "TEST1", display
         ml.setdisplay(display)
-        print "TEST2"
 
         display.init()
         
@@ -53,53 +52,6 @@ def main():
 
     args = parser.parse_args()
     run(args.module)
-
-
-def debug(*args):
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.debugprint(*args)
-
-def error(*args):
-    print "ERROR PRINT", args
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.errorprint(*args)
-    
-def debug_dir(object, filt = None):
-    debug("debug_dir", object, filt)   
-    for k in dir(object):        
-        if filt == None or filt in k.lower():
-            debug(k)    
-
-def debug_xml(*args):
-    debug(*(list(args[:-1]) + [etree.tostring(args[-1], pretty_print = True)]))
-
-def testunit_result(result):
-    for err in result.errors:
-        error(err[1])
-    for err in result.failures:
-        error(err[1])
-
-def show(osgdata):
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.osgprint(osgdata)
-    
-def get_osg_viewer():
-    global ml
-    if ml != None and ml.display != None:
-        return ml.display.getosgviewer()
-
-def setlooptime(loop_time):
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.setlooptime(loop_time)
-
-def add_watch_file(filename):
-    global ml
-    if ml != None:
-        return ml.add_watch_file(filename)
 
 if __name__ == "__main__":
     main()
