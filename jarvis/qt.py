@@ -18,11 +18,11 @@ class MyTextEdit(QtGui.QTextEdit):
     
 class JarvisMain(QtGui.QWidget):
     
-    def __init__(self):
+    def __init__(self, layout=None):
         self.osg_enable = True
         super(JarvisMain, self).__init__()
         
-        self.initUI()
+        self.initUI(layout)
 
     def message(self, object):
         fun_name = object["fun"]
@@ -57,15 +57,29 @@ class JarvisMain(QtGui.QWidget):
         osgWidget.setMinimumWidth(width)
         osgWidget.setMinimumHeight(height)
         return osgWidget
+
+    def parse_layout(self, layout):
+        ret = {}
+        f = open(layout)
+        for line in f:
+            parts = line.split("=")
+            ret[parts[0]] = int(parts[1])
+        return ret
                 
-    def initUI(self):        
-        self.setWindowTitle('Icon')
-        SCREEN_WIDTH = 1440
-        WIDTH=500
-        HEIGHT=900
-        TEXT_HEIGHT=10
-#        self.setGeometry(1440 - WIDTH, 0, WIDTH, 1024)
-        self.setGeometry(SCREEN_WIDTH - WIDTH, 0, WIDTH, HEIGHT)
+    def initUI(self, layout=None):
+        self.setWindowTitle('Jarvis')
+
+        if layout is not None:
+            layout = self.parse_layout(layout)
+        else:
+            layout = {}
+
+        print layout
+
+        WIDTH=480
+        HEIGHT=1024
+        self.setGeometry(1440 - WIDTH, 0, WIDTH, 1024)
+
 #        self.setWindowIcon(QtGui.QIcon('web.png'))
 
         text = ""
@@ -85,8 +99,14 @@ class JarvisMain(QtGui.QWidget):
         self.rightBox.setSpacing(0)
         self.topBox.addLayout(self.rightBox)
 
+<<<<<<< HEAD
         self.error = self.createEditor("", WIDTH, TEXT_HEIGHT)
         self.debug = self.createEditor("", WIDTH, TEXT_HEIGHT)
+=======
+
+        self.error = self.createEditor("", WIDTH, 200)
+        self.debug = self.createEditor("", WIDTH, 200)
+>>>>>>> 4b6d3b03ae8b38fc7851e88be0ec3c0d3e270dfe
         if self.osg_enable:
             self.osgView = self.createOSG(WIDTH, int(WIDTH * 9 / 16.0))
 

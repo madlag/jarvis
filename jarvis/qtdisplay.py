@@ -19,7 +19,7 @@ class QTDisplay(QtCore.QObject):
     # Message signal handler : it's used to pass all messages to Qt widgets
     message_available = QtCore.pyqtSignal(object)
         
-    def __init__(self, mainloop):
+    def __init__(self, mainloop, layout=None):
         # Initialize this as as Qt object
         QtCore.QObject.__init__(self)
         # Create the application
@@ -32,7 +32,7 @@ class QTDisplay(QtCore.QObject):
         QtOpenGL.QGLFormat.setDefaultFormat(glf)
 
         # Create the main widget
-        self.jarvismain = qt.JarvisMain()
+        self.jarvismain = qt.JarvisMain(layout)
 #        self.jm.raise_()
 
         # Connect the message to the main widget
