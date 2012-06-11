@@ -1,8 +1,9 @@
 from Pymacs import lisp
 import os.path
+import jarvis.emacs as emacs
 
 def main():
-    d = os.path.dirname(os.path.abspath(__file__))
+    d = emacs.get_user_dir("commands")
     name = arg[0]
     name = name.replace("-", "_")
     filename = os.path.join(d, name + ".py")

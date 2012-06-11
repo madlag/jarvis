@@ -110,6 +110,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
         camera.getOrCreateStateSet().setAttributeAndModes(osg.BlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA))
         camera.getOrCreateStateSet().setMode(GL.GL_DEPTH_TEST, False)
+        camera.getOrCreateStateSet().setMode(GL.GL_DEPTH_WRITEMASK, False)
         camera.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
         material = osg.Material()
         color = osg.Vec4(1.0,1.0,1.0,1.0)

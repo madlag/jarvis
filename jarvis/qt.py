@@ -60,9 +60,12 @@ class JarvisMain(QtGui.QWidget):
                 
     def initUI(self):        
         self.setWindowTitle('Icon')
-        WIDTH=480
-        HEIGHT=1024
-        self.setGeometry(1440 - WIDTH, 0, WIDTH, 1024)
+        SCREEN_WIDTH = 1440
+        WIDTH=500
+        HEIGHT=900
+        TEXT_HEIGHT=10
+#        self.setGeometry(1440 - WIDTH, 0, WIDTH, 1024)
+        self.setGeometry(SCREEN_WIDTH - WIDTH, 0, WIDTH, HEIGHT)
 #        self.setWindowIcon(QtGui.QIcon('web.png'))
 
         text = ""
@@ -82,8 +85,8 @@ class JarvisMain(QtGui.QWidget):
         self.rightBox.setSpacing(0)
         self.topBox.addLayout(self.rightBox)
 
-        self.error = self.createEditor("", WIDTH, 300)
-        self.debug = self.createEditor("", WIDTH, 300)
+        self.error = self.createEditor("", WIDTH, TEXT_HEIGHT)
+        self.debug = self.createEditor("", WIDTH, TEXT_HEIGHT)
         if self.osg_enable:
             self.osgView = self.createOSG(WIDTH, int(WIDTH * 9 / 16.0))
 
@@ -109,7 +112,8 @@ class JarvisMain(QtGui.QWidget):
         self.debug.append(text)
         text = self.debug.toPlainText()
 
-        self.atomic_write("/tmp/debug.txt", text)
+        debug_file = jarvis.get_filename(jarvis.DEBUG_FILE)
+        self.atomic_write(debug_file, text)
         
     def errorprint(self, *args):
         text = " ".join(map(lambda x: str(x), args)) + "\n"

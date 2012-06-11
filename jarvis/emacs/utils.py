@@ -2,12 +2,21 @@ import os.path
 import jinja2
 import imp
 import time
+import jarvis.emacs as emacs
 
 dirname = os.path.dirname(os.path.abspath(__file__))
-snippetdirname = os.path.join(dirname, "snippets")
+snippetdirnames = []
 
+snippetdirnames = emacs.get_dirs("snippets")
+
+def get_snippet_dir_names():
+    return snippetdirnames
+    
 def load_snippet(commandname, **kwargs):
-    commandfilename = os.path.join(snippetdirname, commandname + ".py")    
+    for snippetdirname in snippetdirnames:        
+        commandfilename = os.path.join(snippetdirname, commandname + ".py")
+        if os.path.exists(commandfilename):
+            break
     s = open(commandfilename).read()
     
     template = jinja2.Template(s)
@@ -80,7 +89,13 @@ def create_init_files(filename):
 
 def module_load_source(filename):
     import imp
-    mod = imp.load_source("entrypoint" + str(time.time()).replace(".", "_"), filename)
+    name = "entrypoint" + str(time.time()).replace(".", "_")
+
+    pyc_filename = filename + "c"
+    if os.path.exists(pyc_filename) and filename.endswith(".py"):
+        os.remove(pyc_filename)
+
+    mod = imp.load_source(name, filename)
     return mod
         
 def find_class_names(filename):

@@ -9,6 +9,7 @@ TEST_MODULE_PATH="testmodule.txt"
 
 # This is the file where errors produced by calls to jarvis.command.error are written.
 ERROR_FILE="error.txt"
+DEBUG_FILE="debug.txt"
 
 def get_home():
     jarvis_home = os.getenv("JARVIS_HOME", "/tmp/jarvis")

@@ -48,8 +48,13 @@ utils.create_init_files(testfilename)
 if os.path.exists(testfilename) and False:
     lisp.message("Test %s already exists" % testfilename)
 else:
-    # Find the snippets that starts with test_ and finish by _create.py 
-    tests = [t for t in os.listdir(os.path.join(os.path.dirname(__file__), "..", "snippets"))]
+    # Find the snippets that starts with test_ and finish by _create.py
+
+    snippetdirnames = utils.get_snippet_dir_names()
+    tests = []
+    for snippetdirname in snippetdirnames:    
+        tests += [t for t in os.listdir(snippetdirname)]
+        
     tests = filter(lambda x: x.startswith("test_") and x.endswith("_create.py"), tests)
     tests = map(lambda x:x[5:-10], tests)
 

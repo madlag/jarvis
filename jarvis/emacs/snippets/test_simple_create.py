@@ -6,7 +6,7 @@ import shutil
 import mock 
 import mox
 import {{module}} as {{shortmodule}}
-from jarvis import *
+from jarvis.commands import *
 
 this_dir = op.dirname(__file__)
 data_dir = op.join(this_dir, "data")
@@ -30,6 +30,9 @@ class Test{{TestClassName}}(unittest.TestCase):
         
     def data_file_name(self, filename):
         return op.join(data_dir, filename)
+    
+    def get_test_file_name(self, filename):
+        return op.join(tmp_dir, filename)
 
     def test_main(self):
         # TODO
@@ -46,8 +49,9 @@ class Test{{TestClassName}}(unittest.TestCase):
 
         
 def main():
+    prefix = "test_"
     suite = unittest.TestLoader().loadTestsFromTestCase(Test{{TestClassName}})
-    suite = filter(lambda x : str(x).startswith("test_"), suite)
+    suite = filter(lambda x : str(x).startswith(prefix), suite)
     suite = unittest.TestLoader().suiteClass(suite)
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     testunit_result(result)

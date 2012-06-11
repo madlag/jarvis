@@ -63,20 +63,39 @@ class SnippetWrap(FunctionWrap):
 # Build the commands directory
 dirname = os.path.dirname(os.path.abspath(__file__))
 
-commanddirname= os.path.join(dirname, "commands")
+def get_user_dir(n):
+    ret = os.path.join(os.getenv("HOME"), ".jarvis.d", n)
+    # Create the directory
+    if not os.path.exists(ret):
+        os.path.makedirs(ret)
+    return ret
 
-# Enumerate the commands 
-for f in os.listdir(commanddirname):
-    if f.endswith(".py"):
-        commandname = f[:-3]
-        commandfilename = os.path.join(commanddirname, f)
-        globals()[commandname] = FunctionWrap(commandfilename)
+def get_dirs(n):
+    subdirnames = []
+    for d in [os.path.join(os.getenv("HOME"), ".jarvis.d"), dirname]:
+        subdirname = os.path.join(d, n)
+        if os.path.exists(subdirname) and os.path.isdir(subdirname):
+            subdirnames += [subdirname]
+    return subdirnames
 
-snippetdirname = os.path.join(dirname, "snippets")
+commanddirnames = get_dirs("commands")
 
-# Enumerate the snippets
-for f in os.listdir(snippetdirname):
-    if f.endswith(".py"):
-        commandname = f[:-3]
-        commandfilename = os.path.join(snippetdirname, f)
-        globals()[commandname] = SnippetWrap(commandfilename)
+for commanddirname in commanddirnames:
+    # Enumerate the commands 
+    for f in os.listdir(commanddirname):
+        if f.endswith(".py"):
+            commandname = f[:-3]
+            commandfilename = os.path.join(commanddirname, f)
+            if commandname not in globals():
+                globals()[commandname] = FunctionWrap(commandfilename)
+
+snippetdirnames = get_dirs("snippets")
+
+for snippetdirname in snippetdirnames:
+    # Enumerate the snippets
+    for f in os.listdir(snippetdirname):
+        if f.endswith(".py"):
+            commandname = f[:-3]
+            commandfilename = os.path.join(snippetdirname, f)
+            if commandname not in globals():
+                globals()[commandname] = SnippetWrap(commandfilename)

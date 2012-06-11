@@ -12,6 +12,5 @@ def main():
     f.write(testmodule)
     f.close()
 
-
 if "arg" in globals():
     main()
