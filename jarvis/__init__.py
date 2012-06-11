@@ -55,47 +55,6 @@ def main():
     args = parser.parse_args()
     run(args.module, args.layout)
 
-def debug(*args):
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.debugprint(*args)
-
-def error(*args):
-    print "ERROR PRINT", args
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.errorprint(*args)
-    
-def debug_dir(object, filt = None):
-    debug("debug_dir", object, filt)   
-    for k in dir(object):        
-        if filt == None or filt in k.lower():
-            debug(k)    
-
-def debug_xml(*args):
-    debug(*(list(args[:-1]) + [etree.tostring(args[-1], pretty_print = True)]))
-
-def testunit_result(result):
-    for err in result.errors:
-        error(err[1])
-
-def show(osgdata):
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.osgprint(osgdata)
-    
-def get_osg_viewer():
-    global ml
-    if ml != None and ml.display != None:
-        return ml.display.getosgviewer()
-
-def setlooptime(loop_time):
-    global ml
-    if ml != None and ml.display != None:
-        ml.display.setlooptime(loop_time)
-
->>>>>>> 4b6d3b03ae8b38fc7851e88be0ec3c0d3e270dfe
-
 if __name__ == "__main__":
     main()
 
