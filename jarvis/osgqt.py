@@ -92,11 +92,13 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.resetCamera(viewer)
         return viewer
 
+    
     def resetCamera(self, viewer):
+        
         camera = viewer.getCamera()
-
+#        camera = osg.Camera()
         camera.setViewport(osg.Viewport(0,0, self.width(), self.height()))
-
+#        camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
         CAMERA_ANGLE = 45.0
         CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))    
         cameraPosition = [0.0, 0.0, CAMERA_Z_TRANSLATE]
@@ -119,41 +121,58 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-
+       
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
-        camera.setGraphicsContext(self.gw)
+
         self.camera = camera
+        
+#        viewer.getCamera().setViewport(osg.Viewport(0,0, self.width(), self.height()))
+ #       viewer.getCamera().addChild(camera)
+        camera.setGraphicsContext(self.gw)
     
     def heightForWidth(self, w):
         ret = int(w * 9.0 / 16.0)
         return ret
-        
-    def createViewerNew(self):
-        # Standard size
-        size = (self.width(), self.height())
-        screen_ratio = float(size[0]) / float(size[1])
 
-        # Build the camera
-        import math
+    def texture_build(self):
+        texture = osg.Texture2D()
+        texture.setTextureSize(self.width(), self.height())
+        texture.setInternalFormat(GL.GL_RGBA)
+        texture.setResizeNonPowerOfTwoHint(False)
+
+        # bug detected here, if I enable mipmap osg seems to use the view buffer to
+        # do something. If I disable the mipmap it works.
+        # you can view the issue with test_09_gaussian_filter.py
+        #texture.setFilter(osg.Texture.MIN_FILTER, osg.Texture.LINEAR_MIPMAP_LINEAR)
+        texture.setFilter(osg.Texture.MIN_FILTER, osg.Texture.LINEAR)
+        texture.setFilter(osg.Texture.MAG_FILTER, osg.Texture.LINEAR)
+        return texture
+
+    def camera_build(self):        
+        texture = self.texture_build()
+        
+        camera = osg.Camera()
+        camera.setViewport(osg.Viewport(0,0, self.width(), self.height()))
+        camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
+        camera.setRenderOrder(osg.Camera.PRE_RENDER)
+        camera.setRenderTargetImplementation(osg.Camera.FRAME_BUFFER_OBJECT)
+        camera.attach(osg.Camera.COLOR_BUFFER, texture, 0, 0, False, 0, 0)
+        
         CAMERA_ANGLE = 45.0
-        CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))
-    
+        CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))    
         cameraPosition = [0.0, 0.0, CAMERA_Z_TRANSLATE]
 
-        # Create the viewer
-        viewer = osgViewer.Viewer()
+        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE,float(self.width())/float(self.height()), 1.0, 10000.0)
 
-#        viewer.setSceneData(camera)
+        eye = osg.Vec3d(cameraPosition[0], cameraPosition[1], cameraPosition[2])
+        center = osg.Vec3d(0,0,0)
+        up = osg.Vec3d(0,1,0)
+        camera.setViewMatrixAsLookAt(eye, center, up)
 
-        camera = viewer.getCamera()
-
-        # Setup the viewport
-        camera.setViewport(osg.Viewport(0,0,size[0], size[1]))
-        camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
-        position = cameraPosition
-        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE, screen_ratio, 0.01, 100.0)
         camera.getOrCreateStateSet().setAttributeAndModes(osg.BlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA))
+        camera.getOrCreateStateSet().setMode(GL.GL_DEPTH_TEST, False)
+        camera.getOrCreateStateSet().setMode(GL.GL_DEPTH_WRITEMASK, False)
         camera.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
         material = osg.Material()
         color = osg.Vec4(1.0,1.0,1.0,1.0)
@@ -162,32 +181,45 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-
-        eye = osg.Vec3d(cameraPosition[0], cameraPosition[1], cameraPosition[2])
-        center = osg.Vec3d(0,0,0)
-        up = osg.Vec3d(0,1,0)
-        camera.setViewMatrixAsLookAt(eye, center, up)
-
-        self.camera = camera
         
-        if not self.gw:
-            raise Exception("GraphicsWindow not yet created")
+                
+        return camera, texture
 
-        viewer.getCamera().setGraphicsContext(self.gw)        
+    def quad_create(self, texture):
+        stateset = osg.StateSet()
+        stateset.setTextureAttributeAndModes(0, texture)
 
-        viewer.setThreadingModel(osgViewer.ViewerBase.SingleThreaded)
+        w = 16.0 / 9.0
+        h = 1.0
+        corner = osg.Vec3(-w,-h, 0)
+        width = osg.Vec3(2 * w,0,0)
+        height = osg.Vec3(0,2 * h,0)
+
+        geom = osg.createTexturedQuadGeometry(corner, width, height, 0.0, 0.0, 1.0, 1.0)
+        geom.setStateSet(stateset)
+
+        geode = osg.Geode()
+        geode.addDrawable(geom)
+        return geode
+
+    
+    def build_wrapping_node(self, data):
+        grp = osg.Group()
+        camera,texture = self.camera_build()
         
-#        viewer.setUpViewInWindow(0,0, size[0], size[1])
-#        viewer.addEventHandler(osgViewer.HelpHandler());
-#        viewer.addEventHandler(osgViewer.StatsHandler());
-        viewer.addEventHandler(osgViewer.ThreadingHandler())
-#        viewer.setThreadingModel(osgViewer.ViewerBase.SingleThreaded)
+        grp.addChild(camera)
+        camera.addChild(data)
 
-        return viewer
-
+        quad = self.quad_create(texture)
+        grp.addChild(quad)
+        
+        grp.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
+        return grp
+    
     def setSceneData(self, data):
         self.startTime = time.time()
         if data  != None:
+            data = self.build_wrapping_node(data)
             self.viewer.setSceneData(data)
     
     def getosgviewer(self):

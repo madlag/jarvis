@@ -5,6 +5,7 @@ The central idea is that the feedback loop when you are coding should be the sho
 Jarvis implements a (small) subset of these ideas.
 
 == What is Jarvis ==
+
 Jarvis is a Python programming companion. Point it to a python function, and it will execute it.
 As soon as you change your code in your favorite text editor, Jarvis will detect it, and will rerun the function, using some nice Python tricks to reload code without rerunning the full interpreter.
 
@@ -13,8 +14,10 @@ You can insert in your code some debug statements, that will be displayed in the
 Last, but not least, if you are using [http://www.openscenegraph.org/ OpenSceneGraph] Python bindings, you will be able to output an OSG tree to the Jarvis interface. This way, you can instantly see the new 3D scene your code is generating, in a way similar to the talk "Inventing on Principle".
 
 == Requirements == 
+
 Jarvis uses Qt & PyQt, [http://www.openscenegraph.org/ OpenSceneGraph] & [http://code.google.com/p/osgswig/ osgswig].
 
 
 == Authors ==
-François Lagunas, CTO, [http://www.stupeflix.com Stupeflix]
+
+Francois Lagunas, CTO, [http://www.stupeflix.com Stupeflix]
