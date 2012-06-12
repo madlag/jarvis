@@ -32,7 +32,7 @@ def run(modulename, layout=None):
 
     try:
         ml = mainloop.MainLoop(modulename)
-        
+
         display = qtdisplay.QTDisplay(ml, layout)
         ml.setdisplay(display)
 
