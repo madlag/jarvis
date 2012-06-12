@@ -162,25 +162,3 @@ class JarvisMain(QtGui.QWidget):
             s = codecs.open(self.filename,'w','utf-8')
             s.write(unicode(self.ui.editor_window.toPlainText()))
             s.close()
-
-
-
-def main():    
-    app = QtGui.QApplication(sys.argv)
-    
-    ex = JarvisMain()
-#    ex.raise_()
-
-
-    # create a root node
-    node = osg.Group()
-    # open a file
-    loadedmodel = osgDB.readNodeFile("/Users/lagunas/tmp/osgIphoneExampleGLES2/cow.osg")
-    node.addChild(loadedmodel)
-    
-    ex.osgView.viewer.setSceneData(node)
-
-    sys.exit(app.exec_())
-
-if __name__ == '__main__':
-    main()    
