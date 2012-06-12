@@ -1,4 +1,5 @@
 import jarvis
+import inspect
 from lxml import etree
 import os
 
@@ -62,3 +63,33 @@ def add_watch_file(filename):
     if ml != None:
         return ml.add_watch_file(filename)
 
+def replace_this(*args):
+    if len(args) == 0:
+        raise Exception("jarvis.commands.replace_this: Nothing to replace by")
+    # Retrieve the calling frame
+    frame = inspect.stack()[1]
+    # Get the file name and the line_number
+    file_name = frame[1]
+    line_number = frame[2]
+    # Split by line the source file
+    lines = open(file_name).read().split("\n")
+    # Retrieve the right line
+    line = lines[line_number - 1]
+    # Check that the source code is still matching
+    inspect_line = frame[4][0][:-1]
+    if line != inspect_line or "replace_this" not in line:
+        raise Exception("jarvis.commands.replace_this: looks like the file changed before replace could occur.")
+
+    for i,c in enumerate(inspect_line):
+        if c != " ":
+            break
+    # Build the replacement line
+    replacement = " " * i + args[0] % args[1:]
+    # Replace the line
+    lines[line_number - 1] = replacement
+    # Rebuild the file content
+    file_content = "\n".join(lines)
+    # Write back the file
+    file = open(file_name, "w")
+    file.write(file_content)
+    file.close()    

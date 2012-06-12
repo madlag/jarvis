@@ -99,14 +99,10 @@ class JarvisMain(QtGui.QWidget):
         self.rightBox.setSpacing(0)
         self.topBox.addLayout(self.rightBox)
 
-<<<<<<< HEAD
-        self.error = self.createEditor("", WIDTH, TEXT_HEIGHT)
-        self.debug = self.createEditor("", WIDTH, TEXT_HEIGHT)
-=======
 
         self.error = self.createEditor("", WIDTH, 200)
         self.debug = self.createEditor("", WIDTH, 200)
->>>>>>> 4b6d3b03ae8b38fc7851e88be0ec3c0d3e270dfe
+        
         if self.osg_enable:
             self.osgView = self.createOSG(WIDTH, int(WIDTH * 9 / 16.0))
 
