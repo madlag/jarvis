@@ -269,21 +269,3 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         """returns the osg graphicswindow created by osgViewer """
         return self.gw 
 
-
-if  __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
-    mainwindow = MainWindow()
-
-    #show the mainwindow
-    mainwindow.show()
-
-    time.sleep(10)
-    # create a root node
-    node = osg.Group()
-    # open a file
-    loadedmodel = osgDB.readNodeFile("/Users/lagunas/tmp/osgIphoneExampleGLES2/cow.osg")
-    node.addChild(loadedmodel)
-    mainwindow.setSceneData(node)
-
-    #execute the application
-    sys.exit(app.exec_())
