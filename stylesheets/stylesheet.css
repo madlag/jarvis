@@ -321,6 +321,20 @@ Full-Width Styles
   text-shadow: #111 0px 0px 10px;
 }
 
+
+#header_links {
+    margin-top :20px;
+}
+.project_link {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  background: none;
+  text-shadow: #111 0px 0px 10px;
+  margin-right:20px;
+}
+
+
 #downloads {
   position: absolute;
   width: 210px;
