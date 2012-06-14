@@ -2,7 +2,7 @@ from Pymacs import lisp
 import subprocess
 import jarvis
 
-module_name = open(jarvis.get_filename(jarvis.TEST_MODULE_PATH)).read()
+test_filename_function = open(jarvis.get_filename(jarvis.TEST_FILENAME_FUNCTION)).read()
 
-lisp.compile("jarvis --module " + module_name)
+lisp.compile("jarvis --filename_function " + test_filename_function)
 

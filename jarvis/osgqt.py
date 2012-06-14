@@ -217,10 +217,13 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         return grp
     
     def setSceneData(self, data):
-        self.startTime = time.time()
+        start = time.time()
+#        self.startTime = time.time()
         if data  != None:
             data = self.build_wrapping_node(data)
             self.viewer.setSceneData(data)
+        end = time.time()
+        self.startTime += end - start
     
     def getosgviewer(self):
         return self.viewer

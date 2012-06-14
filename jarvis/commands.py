@@ -3,17 +3,17 @@ import inspect
 from lxml import etree
 import os
 
-def set_test_module(test_module):
+def set_test_filename_function(test_filename_function):
     """Set the module.function that jarvis watches for changes and then executes."""
     # Get the jarvis home directory
     jarvis_home = jarvis.get_home()
 
     # Find the file that holds the current module.function to test
-    testmodulefilename = os.path.join(jarvis_home, jarvis.TEST_MODULE_PATH)
+    testmodulefilename = os.path.join(jarvis_home, jarvis.TEST_FILENAME_FUNCTION)
 
     # Write the file
     f=open(testmodulefilename, "w")
-    f.write(test_module)
+    f.write(test_filename_function)
     f.close()
 
 def error(*args):

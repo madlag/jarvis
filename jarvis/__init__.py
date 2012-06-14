@@ -5,7 +5,7 @@ import traceback
 ml = None
 
 # This is the place where is stored the currently tested 'module.function' .
-TEST_MODULE_PATH="testmodule.txt"
+TEST_FILENAME_FUNCTION="test_filename_function.txt"
 
 # This is the file where errors produced by calls to jarvis.command.error are written.
 ERROR_FILE="error.txt"
@@ -25,13 +25,13 @@ def get_filename(key):
     error_file = os.path.join(get_home(), key)    
     return error_file
 
-def run(modulename, layout=None):
+def run(filename_function, layout=None):
     global ml
     import qtdisplay
     import mainloop
 
     try:
-        ml = mainloop.MainLoop(modulename)
+        ml = mainloop.MainLoop(filename_function)
 
         display = qtdisplay.QTDisplay(ml, layout)
         ml.setdisplay(display)
@@ -49,16 +49,13 @@ def run(modulename, layout=None):
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument("--nogl", default=False, action="store_true", help="disable gl window")
-    parser.add_argument("--module", metavar="NAME")
+    parser.add_argument("--filename_function", metavar="NAME")
     parser.add_argument("--layout", metavar="LAYOUT", default=None)
 
     args = parser.parse_args()
-    run(args.module, args.layout)
+    run(args.filename_function, args.layout)
 
 if __name__ == "__main__":
     main()
 
-from commands import *
 
-def coucou():
-    a = 4

@@ -78,6 +78,14 @@ def get_dirs(n):
             subdirnames += [subdirname]
     return subdirnames
 
+def get_command_file(command_name):
+    for commanddirname in commanddirnames:
+        # Enumerate the commands
+        full_file_name = os.path.join(commanddirname, command_name + ".py")
+        if os.path.exists(full_file_name):
+            return full_file_name
+    return None
+
 commanddirnames = get_dirs("commands")
 
 for commanddirname in commanddirnames:

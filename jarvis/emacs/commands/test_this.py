@@ -6,6 +6,4 @@ reload(utils)
 # Retrieve current buffer file name
 filename = lisp.buffer_file_name()
 
-module_name = utils.find_module_name(filename) + ".main"
-
-lisp.j_test_module_current_set(module_name)
+lisp.j_test_filename_function_set(filename + ":main")

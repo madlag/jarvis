@@ -6,6 +6,7 @@ import traceback
 from PyQt4 import QtCore
 import jarvis
 import rollbackimporter
+import imp
 
 class Display():
     def __init__(self):
@@ -33,18 +34,14 @@ class Display():
 
         
 class MainLoop(QtCore.QThread):
-    def __init__(self, module, display = None):
+    def __init__(self, filename_function, display = None):
         QtCore.QThread.__init__(self)
 
-        self.module_function_name = module
+        self.filename_function = filename_function
         self.finished = False
         self.display = display
         self.filedates = {}
         self.module = None
-
-        modName = self.module_function_name
-        modNameParts = modName.split(".")
-        self.module_name = ".".join(modNameParts[:-1])
         
         self.rollbackImporter = rollbackimporter.RollbackImporter()
         self.watchfiles = {}
@@ -112,26 +109,31 @@ class MainLoop(QtCore.QThread):
                             
         return modified, checkedfiles
 
-    def loadMainModule(self):
-        modName = self.module_function_name
-        modNameParts = modName.split(".")
-        mod = __import__(".".join(modNameParts[:-1]))
+    def get_test_filename(self):
+        parts = self.filename_function.split(":")
+        return parts[0]
+    
+    def get_test_fun_name(self):
+        parts = self.filename_function.split(":")
+        filename = parts[0]
+        if len(parts) > 1:
+            function_name = parts[1]
+        else:
+            function_name = "main"
+        return function_name
+        
+    def loadMainModule(self):            
+        mod = imp.load_source("__module__" + str(time.time()).replace(".", "_"), self.get_test_filename())
 
-#        print "FOUND", "test_" in sys.modules.keys()
-        for p in modNameParts[1:-1]:            
-            mod = getattr(mod, p)
         self.module = mod
-#        reload(self.module)
 
     def modulechanged(self):
         # Check that main module has not changed
-        testmodulepath = os.path.join(jarvis.get_home(), jarvis.TEST_MODULE_PATH)
-        testmodulename = None
+        test_filename_function_path = os.path.join(jarvis.get_home(), jarvis.TEST_FILENAME_FUNCTION)
         
-        testmodulename = open(testmodulepath).read()
-        if testmodulename != self.module_function_name:
-            self.module_function_name = testmodulename
-            print "CHANGED", testmodulename
+        test_filename_function = open(test_filename_function_path).read()
+        if test_filename_function != self.filename_function:
+            self.filename_function = test_filename_function
             return True
         return False
 
@@ -175,10 +177,11 @@ class MainLoop(QtCore.QThread):
         return modified
 
     def runcommand(self):
-        fun = getattr(self.module, self.module_function_name.split(".")[-1])
+        fun = getattr(self.module, self.get_test_fun_name())
         try:
             fun()
         except Exception, e:
+            print traceback.format_exc(e)
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             self.display.errorprint("%s:%s\n" % (fname, exc_tb.tb_lineno) + traceback.format_exc(e) + "\n")
@@ -223,6 +226,7 @@ class MainLoop(QtCore.QThread):
             try:
                 self.runloop()
             except Exception, e:
+                print traceback.format_exc(e)
                 if self.display != None:
                     self.display.start()
                     self.display.errorprint(traceback.format_exc(e))
@@ -231,9 +235,9 @@ class MainLoop(QtCore.QThread):
                                                 
     def run(self):
         # Write the current module name to disk
-        testmodulepath = os.path.join(jarvis.get_home(), jarvis.TEST_MODULE_PATH)
+        testmodulepath = os.path.join(jarvis.get_home(), jarvis.TEST_FILENAME_FUNCTION)
         f = open(testmodulepath, "w")
-        f.write(self.module_function_name)
+        f.write(self.filename_function)
         f.close()        
 
         try:
@@ -241,7 +245,7 @@ class MainLoop(QtCore.QThread):
         except KeyboardInterrupt:
             pass
         except Exception, e:
-            print e
+            print traceback.format_exc(e)
         
 
 

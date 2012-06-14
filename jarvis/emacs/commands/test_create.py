@@ -87,5 +87,4 @@ else:
 
 lisp.find_file(testfilename)
 
-test_module = utils.find_module_name(testfilename) + ".main"
-lisp.j_test_module_current_set(test_module)
+lisp.j_test_filename_function_set(testfilename + ":main")
