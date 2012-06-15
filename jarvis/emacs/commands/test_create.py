@@ -12,6 +12,8 @@ Launch this command in a given  code buffer, it will create the test with it
 # Retrieve current buffer file name
 filename = lisp.buffer_file_name()
 
+filename = os.path.abspath(filename)
+
 # Find the test path
 test_path = utils.find_tests_path(filename)
 

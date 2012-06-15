@@ -3,6 +3,7 @@ import jinja2
 import imp
 import time
 import jarvis.emacs as emacs
+import os
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 snippetdirnames = []
@@ -25,35 +26,49 @@ def load_snippet(commandname, **kwargs):
 
     return s
 
-def snippet_run():
-    import sys
-    if len(sys.argv) < 3:
-        print "USAGE: jarvis_snippet_run SNIPPET_NAME DESTINATION_FILE"
-        return
-    snippet_name = sys.argv[1]
-    if not hasattr(emacs, snippet_name):
-        print "Unknown snippet %s" % snippet_name
-        return
-    snippet = getattr(emacs, snippet_name)
-    if not isinstance(snippet, emacs.SnippetWrap):
-        print "Snippet %s does not exists" % snippet_name
-        return
-    else:
-        spec = snippet.interaction
-        spec = map(lambda x:x.strip(), spec.split("\n"))
-        spec = filter(lambda x:len(x) != 0, spec)
-        kwargs = {}
-        for s in spec:
-            type = s[0]
-            name = s[1:-1]
-            b = raw_input(name + ":")
-            kwargs[name] = b
+def command_spec_run(spec):
+    spec = map(lambda x:x.strip(), spec.split("\n"))
+    spec = filter(lambda x:len(x) != 0, spec)
+    args = []
+    kwargs = {}
+    for s in spec:
+        type = s[0]
+        name = s[1:-1]
+        b = raw_input(name + ":")
+        args += [b]
+        kwargs[name] = b
+    return args, kwargs
 
-        s = load_snippet(snippet_name, **kwargs)
+def command_run():
+    import sys
+    if len(sys.argv) < 2:
+        print "USAGE: jarvis_run COMMAND_NAME [DESTINATION_FILE]"
+        return
+    command_name = sys.argv[1]
+    if not hasattr(emacs, command_name):
+        print "Unknown command %s" % command_name
+        return
+    command = getattr(emacs, command_name)    
+    if isinstance(command, emacs.SnippetWrap):
+        if len(sys.argv) < 3:
+            print "USAGE: jarvis_run COMMAND_NAME DESTINATION_FILE"
+            return
+        spec = command.interaction
+        args, kwargs = command_spec_run(spec)
+                
+        s = load_snippet(command_name, **kwargs)
         dest_file = open(sys.argv[2], "w")
         dest_file.write(s)
         dest_file.close()
-            
+    elif isinstance(command, emacs.FunctionWrap):
+        import Pymacs
+        import pseudolisp
+        savelisp = Pymacs.lisp
+        Pymacs.lisp = pseudolisp.Lisp()
+        spec = command.interaction
+        args, kwarss = command_spec_run(spec)
+        command(*args)
+        Pymacs.lisp = savelisp
 
 # Find the "tests" directory
 def find_tests_path(filename):

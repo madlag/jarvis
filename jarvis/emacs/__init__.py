@@ -17,9 +17,6 @@ class FunctionWrap(object):
     def __init__(self, commandfilename):
         self.commandfilename = commandfilename
         self.interaction = self.interaction_()
-        f = open("/tmp/log", "a")
-        f.write(self.interaction)
-        f.close()
         
     def __call__(self, *args, **kwargs):
         f = open("/tmp/log2", "a")
