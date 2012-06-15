@@ -25,6 +25,32 @@ def load_snippet(commandname, **kwargs):
 
     return s
 
+def snippet_run():
+    import sys
+    if len(sys.argv) < 2:
+        print "USAGE: jarvis_snippet_run SNIPPET_NAME"
+        return
+    snippet_name = sys.argv[1]
+    if not hasattr(emacs, snippet_name):
+        print "Unknown snippet %s" % snippet_name
+        return
+    snippet = getattr(emacs, snippet_name)
+    if not isinstance(snippet, emacs.SnippetWrap):
+        print "Snippet %s does not exists" % snippet_name
+        return
+    else:
+        spec = snippet.interaction
+        spec = map(lambda x:x.strip(), spec.split("\n"))
+        spec = filter(lambda x:len(x) != 0, spec)
+        kwargs = {}
+        for s in spec:
+            type = s[0]
+            name = s[1:-1]
+            b = raw_input(name + ":")
+            kwargs[name] = b
+
+        print load_snippet(snippet_name, **kwargs)
+            
 
 # Find the "tests" directory
 def find_tests_path(filename):
@@ -113,3 +139,4 @@ def find_class_names(filename):
             class_names  += [cl.__name__]
 
     return class_names
+

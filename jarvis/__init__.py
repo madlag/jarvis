@@ -4,7 +4,7 @@ import traceback
 
 ml = None
 
-# This is the place where is stored the currently tested 'module.function' .
+# This is the place where is stored the currently tested 'filename:function' .
 TEST_FILENAME_FUNCTION="test_filename_function.txt"
 
 # This is the file where errors produced by calls to jarvis.command.error are written.

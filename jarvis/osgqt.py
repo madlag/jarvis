@@ -4,9 +4,9 @@
 __author__  = ["Rene Molenaar"]
 __url__     = ("http://code.google.com/p/osgswig/")
 __version__ = "1.0.0"
-__doc__     = """ This example shows to use osgViewer.Viewer within PyQt4 ____Rene Molenaar 2008 
+__doc__     = """ This example shows to use osgViewer.Viewer within PyQt4 ____Rene Molenaar 2008
                   the basics functionality is present, but there are many 'missing features'
-                  for example, mouse modifiers are not adapted, mouse wheel is not adapted and 
+                  for example, mouse modifiers are not adapted, mouse wheel is not adapted and
                   non-ascii keyboard input is not adapted.
               """
 
@@ -42,6 +42,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.camera = None
         self.startTime = time.time()
         self.loopTime = 10.0
+        self.mousePressed = False
+        self.current_mouse_time = 0
 
     def initializeGL (self):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
@@ -92,15 +94,15 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.resetCamera(viewer)
         return viewer
 
-    
+
     def resetCamera(self, viewer):
-        
+
         camera = viewer.getCamera()
 #        camera = osg.Camera()
         camera.setViewport(osg.Viewport(0,0, self.width(), self.height()))
 #        camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
         CAMERA_ANGLE = 45.0
-        CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))    
+        CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))
         cameraPosition = [0.0, 0.0, CAMERA_Z_TRANSLATE]
 
         camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE,float(self.width())/float(self.height()), 1.0, 10000.0)
@@ -121,16 +123,16 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-       
+
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
 
         self.camera = camera
-        
+
 #        viewer.getCamera().setViewport(osg.Viewport(0,0, self.width(), self.height()))
  #       viewer.getCamera().addChild(camera)
         camera.setGraphicsContext(self.gw)
-    
+
     def heightForWidth(self, w):
         ret = int(w * 9.0 / 16.0)
         return ret
@@ -149,18 +151,18 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         texture.setFilter(osg.Texture.MAG_FILTER, osg.Texture.LINEAR)
         return texture
 
-    def camera_build(self):        
+    def camera_build(self):
         texture = self.texture_build()
-        
+
         camera = osg.Camera()
         camera.setViewport(osg.Viewport(0,0, self.width(), self.height()))
         camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
         camera.setRenderOrder(osg.Camera.PRE_RENDER)
         camera.setRenderTargetImplementation(osg.Camera.FRAME_BUFFER_OBJECT)
         camera.attach(osg.Camera.COLOR_BUFFER, texture, 0, 0, False, 0, 0)
-        
+
         CAMERA_ANGLE = 45.0
-        CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))    
+        CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))
         cameraPosition = [0.0, 0.0, CAMERA_Z_TRANSLATE]
 
         camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE,float(self.width())/float(self.height()), 1.0, 10000.0)
@@ -181,8 +183,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-        
-                
+
+
         return camera, texture
 
     def quad_create(self, texture):
@@ -202,20 +204,26 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         geode.addDrawable(geom)
         return geode
 
-    
+
     def build_wrapping_node(self, data):
         grp = osg.Group()
         camera,texture = self.camera_build()
-        
+
         grp.addChild(camera)
         camera.addChild(data)
 
         quad = self.quad_create(texture)
         grp.addChild(quad)
-        
+
         grp.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
         return grp
-    
+
+    def get_current_time(self):
+        if self.mousePressed:
+            return self.current_mouse_time
+        else:
+            return time.time() - self.startTime
+
     def setSceneData(self, data):
         start = time.time()
 #        self.startTime = time.time()
@@ -224,34 +232,42 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             self.viewer.setSceneData(data)
         end = time.time()
         self.startTime += end - start
-    
+
     def getosgviewer(self):
         return self.viewer
-    
+
     def resizeGL( self, w, h ):
         self.gw.resized(0,0,w,h)
         self.resetCamera(self.viewer)
 
     def paintGL (self):
-        t = time.time() - self.startTime
+        t = self.get_current_time()
         if t >= self.loopTime:
             self.startTime = time.time()
             t = 0.0
 
         self.viewer.frameAtTime(t)
 
+    def set_time_from_mouse(self, position):
+        self.current_mouse_time = self.loopTime * float(position) / float(self.width())
+        self.startTime = time.time() - self.current_mouse_time
+
     def mousePressEvent( self, event ):
         """put the qt event in the osg event queue"""
         button = mouseButtonDictionary.get(event.button(), 0)
+        self.mousePressed = True
+        self.set_time_from_mouse(event.x())
         self.gw.getEventQueue().mouseButtonPress(event.x(), event.y(), button)
 
     def mouseReleaseEvent( self, event ):
         """put the qt event in the osg event queue"""
         button = mouseButtonDictionary.get(event.button(), 0)
+        self.mousePressed = False
         self.gw.getEventQueue().mouseButtonRelease(event.x(), event.y(), button)
 
     def mouseMoveEvent(self, event):
         """put the qt event in the osg event queue"""
+        self.set_time_from_mouse(event.x())
         self.gw.getEventQueue().mouseMotion(event.x(), event.y())
 
     def keyPressEvent(self, event):
@@ -270,5 +286,5 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def getGraphicsWindow(self):
         """returns the osg graphicswindow created by osgViewer """
-        return self.gw 
+        return self.gw
 
