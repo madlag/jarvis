@@ -27,8 +27,8 @@ def load_snippet(commandname, **kwargs):
 
 def snippet_run():
     import sys
-    if len(sys.argv) < 2:
-        print "USAGE: jarvis_snippet_run SNIPPET_NAME"
+    if len(sys.argv) < 3:
+        print "USAGE: jarvis_snippet_run SNIPPET_NAME DESTINATION_FILE"
         return
     snippet_name = sys.argv[1]
     if not hasattr(emacs, snippet_name):
@@ -49,7 +49,10 @@ def snippet_run():
             b = raw_input(name + ":")
             kwargs[name] = b
 
-        print load_snippet(snippet_name, **kwargs)
+        s = load_snippet(snippet_name, **kwargs)
+        dest_file = open(sys.argv[2], "w")
+        dest_file.write(s)
+        dest_file.close()
             
 
 # Find the "tests" directory
