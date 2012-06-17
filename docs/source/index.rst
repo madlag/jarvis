@@ -5,9 +5,8 @@ Jarvis is a Python programming companion. Point it to a python function, and it 
 
 As soon as you change your code in your favorite text editor, Jarvis will detect it, and will rerun the function, using some nice Python tricks to reload code without rerunning the full interpreter.
 
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    tutorial
    commands
@@ -25,5 +24,4 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-
 
