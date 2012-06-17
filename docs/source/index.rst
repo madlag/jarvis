@@ -14,7 +14,7 @@ As soon as you change your code in your favorite text editor, Jarvis will detect
 
 Quick Start
 ===========
-1  install qt, pyqt, osg, osgswig
+1.  install qt, pyqt, osg, osgswig
 2. ``pip install jarvis``
 3. ``jarvis -c my_python_file.py``
 4. Enjoy !
