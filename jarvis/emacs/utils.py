@@ -4,6 +4,7 @@ import imp
 import time
 import jarvis.emacs as emacs
 import os
+from Pymacs import lisp
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 snippetdirnames = []
@@ -158,3 +159,7 @@ def find_class_names(filename):
 
     return class_names
 
+def cursor_line_number():
+    point = lisp.point()
+    line = lisp.count_lines(1, point + 1)
+    return line

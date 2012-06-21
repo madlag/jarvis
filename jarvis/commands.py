@@ -2,6 +2,7 @@ import jarvis
 import inspect
 from lxml import etree
 import os
+import time
 
 def set_test_filename_function(test_filename_function):
     """Set the module.function that jarvis watches for changes and then executes."""
@@ -16,19 +17,28 @@ def set_test_filename_function(test_filename_function):
     f.write(test_filename_function)
     f.close()
 
+start_time = time.time()
+def delta_time_format():
+    global start_time
+    return str(time.time() - start_time)[:6] + "s"
+
 def error(*args):
     if jarvis.ml != None and jarvis.ml.display != None:
-        jarvis.ml.display.errorprint(*args)
-    
+        jarvis.ml.display.errorprint(delta_time_format(), *args)
+
+def reset_start_time():
+    global start_time
+    start_time = time.time()
+
 def debug(*args):
     if jarvis.ml != None and jarvis.ml.display != None:
-        jarvis.ml.display.debugprint(*args)
+        jarvis.ml.display.debugprint(delta_time_format(), *args)
 
 def debug_dir(object, filt = None):
-    debug("debug_dir", object, filt)   
-    for k in dir(object):        
+    debug("debug_dir", object, filt)
+    for k in dir(object):
         if filt == None or filt in k.lower():
-            debug(k)    
+            debug(k)
 
 def debug_xml(*args):
     debug(*(list(args[:-1]) + [etree.tostring(args[-1], pretty_print = True)]))
@@ -40,7 +50,7 @@ def debug_osg(osgdata):
 def debug_osg_set_loop_time(loop_time):
     if jarvis.ml != None and jarvis.ml.display != None:
         jarvis.ml.display.setlooptime(loop_time)
-        
+
 def testunit_result(result):
     for err in result.errors:
         error(err[1])
@@ -84,4 +94,27 @@ def replace_this(*args):
     # Write back the file
     file = open(file_name, "w")
     file.write(file_content)
-    file.close()    
+    file.close()
+
+
+MAX_INSPECT_ELAPSED = 10
+def external_inspect_vars(file_name, line_number):
+    filename = jarvis.get_filename(jarvis.INSPECT_VAR_QUERY)
+    f = open(filename, "w")
+    query = "%s %s" % (line_number, file_name)
+    f.write(query)
+    f.close()
+    start = time.time()
+    elapsed = 0
+    while elapsed < MAX_INSPECT_ELAPSED:
+        try:
+            filename = jarvis.get_filename(jarvis.INSPECT_VAR_QUERY_RESPONSE)
+            r = open(filename).read()
+            if r.split("\n")[0] == query:
+                return r
+        except IOError:
+            pass
+
+        elapsed = time.time() - start
+
+

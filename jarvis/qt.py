@@ -25,10 +25,13 @@ class JarvisMain(QtGui.QWidget):
         self.initUI(layout)
 
     def message(self, object):
-        fun_name = object["fun"]
-        args = object.get("args", [])
-        kwargs = object.get("kwargs", {})
-        getattr(self, fun_name)(*args, **kwargs)
+        try:
+            fun_name = object["fun"]
+            args = object.get("args", [])
+            kwargs = object.get("kwargs", {})
+            getattr(self, fun_name)(*args, **kwargs)
+        except:
+            pass
 
     def start(self):
         self.debug.clear()
@@ -124,20 +127,20 @@ class JarvisMain(QtGui.QWidget):
         shutil.move(filename + ".tmp", filename)        
 
     def debugprint(self, *args):
-        text = " ".join(map(lambda x: str(x), args)) + "\n"
+        text = " ".join(map(lambda x: str(x), args))
         self.debug.append(text)
         text = self.debug.toPlainText()
 
         debug_file = jarvis.get_filename(jarvis.DEBUG_FILE)
-        self.atomic_write(debug_file, text)
+        self.atomic_write(debug_file, text + "\n")
         
     def errorprint(self, *args):
-        text = " ".join(map(lambda x: str(x), args)) + "\n"
+        text = " ".join(map(lambda x: str(x), args))
         self.error.append(text)
         text = self.error.toPlainText()
 
         error_file = jarvis.get_filename(jarvis.ERROR_FILE)
-        self.atomic_write(error_file, text)
+        self.atomic_write(error_file, text + "\n")
 
     def osgprint(self, data):
         self.osgView.setSceneData(data)

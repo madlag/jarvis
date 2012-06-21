@@ -17,7 +17,7 @@ class FunctionWrap(object):
     def __init__(self, commandfilename):
         self.commandfilename = commandfilename
         self.interaction = self.interaction_()
-        
+
     def __call__(self, *args, **kwargs):
         f = open("/tmp/log2", "a")
         f.write(str(args) + "\n")
@@ -30,16 +30,16 @@ class FunctionWrap(object):
             return open(self.commandfilename[:-3] + ".spec").read()
         except:
             return ""
-        
+
 class SnippetWrap(FunctionWrap):
     def __init__(self, commandfilename):
         e = jinja2.Environment()
         s = open(commandfilename).read()
         ast = e.parse(s)
         self.variables = list(jinja2.meta.find_undeclared_variables(ast))
-                
+
         super(SnippetWrap, self).__init__(commandfilename)
-    
+
     def interaction_(self):
         s = ""
         for v in self.variables:
@@ -53,10 +53,10 @@ class SnippetWrap(FunctionWrap):
         kwargs = {}
         for i, a in enumerate(args):
             kwargs[self.variables[i]] = a
-        
+
         s = template.render(**kwargs)
         lisp.insert(s)
-    
+
 # Build the commands directory
 dirname = os.path.dirname(os.path.abspath(__file__))
 
@@ -75,18 +75,19 @@ def get_dirs(n):
             subdirnames += [subdirname]
     return subdirnames
 
-def get_command_file(command_name):
+def get_command_file(command_name, create = False):
     for commanddirname in commanddirnames:
         # Enumerate the commands
         full_file_name = os.path.join(commanddirname, command_name + ".py")
         if os.path.exists(full_file_name):
             return full_file_name
+
     return None
 
 commanddirnames = get_dirs("commands")
 
 for commanddirname in commanddirnames:
-    # Enumerate the commands 
+    # Enumerate the commands
     for f in os.listdir(commanddirname):
         if f.endswith(".py"):
             commandname = f[:-3]

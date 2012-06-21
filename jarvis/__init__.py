@@ -10,6 +10,8 @@ TEST_FILENAME_FUNCTION="test_filename_function.txt"
 # This is the file where errors produced by calls to jarvis.command.error are written.
 ERROR_FILE="error.txt"
 DEBUG_FILE="debug.txt"
+INSPECT_VAR_QUERY="inspect_var_query.txt"
+INSPECT_VAR_QUERY_RESPONSE="inspect_var_query_response.txt"
 
 def get_home():
     jarvis_home = os.getenv("JARVIS_HOME", "/tmp/jarvis")
