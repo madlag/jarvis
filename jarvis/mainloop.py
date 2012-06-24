@@ -118,7 +118,7 @@ class MainLoop(QtCore.QThread):
     def loadMainModule(self):
         entry_point = self.get_test_filename()
         try:
-            self.module = imp.load_source("__main__", entry_point)
+            self.module = imp.load_source("__mainjarvismodule__", entry_point)
         except IOError, e:
             if e.errno == errno.ENOENT:
                 raise Exception("The entry_point %s does not exist.", entry_point)
@@ -200,9 +200,7 @@ class MainLoop(QtCore.QThread):
         else:
             first = False
 
-
         modified = self.modulechanged()
-        print "modified", modified
 
         if modified:
             self.display.reset()
@@ -210,7 +208,6 @@ class MainLoop(QtCore.QThread):
         self.loadMainModule()
 
         modified_single = self.singlePrepare()
-        print "modified_single", modified_single
 
         modified = modified or modified_single
 
@@ -286,7 +283,6 @@ class MainLoop(QtCore.QThread):
                     self.display.errorprint(traceback.format_exc())
                     self.display.finish()
             finally:
-                print "Setting new time_stamp"
                 # We are sure we have run code that was up to date = self.new_check_timestamp
                 self.last_check_timestamp = self.new_check_timestamp
 
