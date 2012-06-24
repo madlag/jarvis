@@ -42,7 +42,6 @@ class MainLoop(QtCore.QThread):
         self.filename_function = filename_function
         self.finished = False
         self.display = display
-        self.filedates = {}
         self.module = None
 
         self.rollbackImporter = rollbackimporter.RollbackImporter()
@@ -51,6 +50,8 @@ class MainLoop(QtCore.QThread):
         self.run_finished = True
         # Used to debug vars
         self.tracer = None
+        self.last_check_timestamp = 0
+        self.new_check_timestamp = 0
 
     def add_watch_file(self, filename):
         self.watchfiles[filename] = True
@@ -59,9 +60,6 @@ class MainLoop(QtCore.QThread):
         self.display = display
 
     def checkreloadfile(self, filename):
-#        debug = "lizard" in filename
-#        if debug:
-#            print filename
         modified = False
         try:
             filedate = os.path.getmtime(filename)
@@ -70,20 +68,11 @@ class MainLoop(QtCore.QThread):
         except OSError:
             return False, None
 
-        lastdate = self.filedates.get(filename)
-
-#        if debug:
-#            print "lastdate", lastdate, "filedate", filedate
-
-        if lastdate == None:
-            lastdate = filedate
-        elif lastdate < filedate:
-            lastdate = filedate
+        # We add a delay of 1s as gmtime is often rounded to the nearest second ??
+        DELAY = 1
+        if filedate > self.last_check_timestamp - DELAY:
             modified = True
-#            print "MODIFIED"
-
-        self.filedates[filename] = lastdate
-
+        
         return modified, checkedfile
 
     def checkreloadmodule(self, module):
@@ -129,7 +118,7 @@ class MainLoop(QtCore.QThread):
     def loadMainModule(self):
         entry_point = self.get_test_filename()
         try:
-            self.module = imp.load_source("__module__" + str(time.time()).replace(".", "_"), entry_point)
+            self.module = imp.load_source("__main__", entry_point)
         except IOError, e:
             if e.errno == errno.ENOENT:
                 raise Exception("The entry_point %s does not exist.", entry_point)
@@ -202,7 +191,7 @@ class MainLoop(QtCore.QThread):
         if self.display != None:
             self.display.runcommand(self.runcommand)
 
-    def runloop(self):
+    def runloop(self):        
         if not self.run_finished:
             return
 
@@ -210,15 +199,18 @@ class MainLoop(QtCore.QThread):
             first = True
         else:
             first = False
+            
 
         modified = self.modulechanged()
+        print "modified", modified
 
         if modified:
             self.display.reset()
-
+            
         self.loadMainModule()
 
         modified_single = self.singlePrepare()
+        print "modified_single", modified_single
 
         modified = modified or modified_single
 
@@ -255,7 +247,7 @@ class MainLoop(QtCore.QThread):
 
         try:
             query_string = open(filename).read()
-        except IOError, e:
+        except:
             return None
 
         query = query_string.split()
@@ -284,6 +276,8 @@ class MainLoop(QtCore.QThread):
         while(not self.finished):
 
             try:
+                # record at which time we started to check if files were modified
+                self.new_check_timestamp = time.time()
                 self.runloop()
             except:
                 print traceback.format_exc()
@@ -291,6 +285,10 @@ class MainLoop(QtCore.QThread):
                     self.display.start()
                     self.display.errorprint(traceback.format_exc())
                     self.display.finish()
+            finally:
+                print "Setting new time_stamp"
+                # We are sure we have run code that was up to date = self.new_check_timestamp
+                self.last_check_timestamp = self.new_check_timestamp
 
             try:
                 self.trace_query_check()
