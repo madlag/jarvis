@@ -13,16 +13,16 @@ snippetdirnames = emacs.get_dirs("snippets")
 
 def get_snippet_dir_names():
     return snippetdirnames
-    
+
 def load_snippet(commandname, **kwargs):
-    for snippetdirname in snippetdirnames:        
+    for snippetdirname in snippetdirnames:
         commandfilename = os.path.join(snippetdirname, commandname + ".py")
         if os.path.exists(commandfilename):
             break
     s = open(commandfilename).read()
-    
+
     template = jinja2.Template(s)
-    
+
     s = template.render(**kwargs)
 
     return s
@@ -49,14 +49,14 @@ def command_run():
     if not hasattr(emacs, command_name):
         print "Unknown command %s" % command_name
         return
-    command = getattr(emacs, command_name)    
+    command = getattr(emacs, command_name)
     if isinstance(command, emacs.SnippetWrap):
         if len(sys.argv) < 3:
             print "USAGE: jarvis_run COMMAND_NAME DESTINATION_FILE"
             return
         spec = command.interaction
         args, kwargs = command_spec_run(spec)
-                
+
         s = load_snippet(command_name, **kwargs)
         dest_file = open(sys.argv[2], "w")
         dest_file.write(s)
@@ -90,19 +90,19 @@ def find_tests_path(filename):
 
 
 def find_module_name(filename):
-    basename = os.path.basename(filename) 
+    basename = os.path.basename(filename)
     if basename == "__init__.py":
         module_name = []
     else:
         module_name = [basename[:-3]]
 
     current_dir = os.path.dirname(filename)
-        
+
     while(True):
         old_current_dir = current_dir
         initfile = os.path.join(current_dir, "__init__.py")
         if os.path.exists(initfile):
-            module_name = [os.path.basename(current_dir)] + module_name            
+            module_name = [os.path.basename(current_dir)] + module_name
         else:
             break
 
@@ -117,7 +117,7 @@ def load_module_by_filename(filename):
 
 def create_init_files(filename):
     current_dir = os.path.dirname(filename)
-        
+
     while(True):
         old_current_dir = current_dir
         initfile = os.path.join(current_dir, "__init__.py")
@@ -142,13 +142,13 @@ def module_load_source(filename):
 
     mod = imp.load_source(name, filename)
     return mod
-        
+
 def find_class_names(filename):
     import inspect
-    
+
     class_names = []
     # Load the module
-    f = module_load_source(filename) 
+    f = module_load_source(filename)
 
     # Enumerate the classes in the module
     for k in dir(f):
@@ -163,3 +163,50 @@ def cursor_line_number():
     point = lisp.point()
     line = lisp.count_lines(1, point + 1)
     return line
+
+
+    new_var_info = ""
+    infos = eval(var_info.split("\n")[1])
+    for time, info in infos:
+        new_var_info  += "Executed at %ss\n" % time
+
+        context = []
+        for k,v in info.iteritems():
+            context += [(k,v)]
+
+        context.sort(key = lambda x : - x[1][0])
+
+        for k, info in context:
+            new_var_info += "  %s => %s\n" % (k, info[1])
+
+def inspect_format(var_info):
+    new_var_info = ""
+    infos = eval(var_info.split("\n")[1])
+    for time, info in infos:
+        new_var_info  += "Executed at %ss\n" % time
+
+        context = []
+        for k,v in info.iteritems():
+            context += [(k,v)]
+
+        context.sort(key = lambda x : - x[1][0])
+
+        for k, info in context:
+            new_var_info += "  %s => %s\n" % (k, info[1])
+
+    var_info = new_var_info
+
+    return var_info
+
+global_vars = {}
+
+def get_command_global_var(key, default = None):
+    global global_vars
+
+    return global_vars.get(key, default)
+
+def set_command_global_var(key, value):
+    global global_vars
+
+    global_vars[key] = value
+

@@ -145,15 +145,11 @@ class MainLoop(QtCore.QThread):
         return False
 
     def singlePrepare(self):
-
         modified = False
-        self.daemon = True
-        # Check if any file was modified since last run
 
+        # Check if any file was modified since last run
         modules = sys.modules.values()
 
-#        print "is there", "test_" in sys.modules.keys()
-#        print "\n".join(sys.modules.keys())
         fullcheckedfiles = {}
 
         for m in modules:
@@ -166,14 +162,9 @@ class MainLoop(QtCore.QThread):
                     if modified:
                         break
                 except Exception, e:
-#                    pass
                     print traceback.format_exc(e)
-                    print e.__class__.__name__
 
         for filename in self.watchfiles:
-#            if "test_" in filename:
-#                print filename, filename in fullcheckedfiles
-
             if filename not in fullcheckedfiles:
                 checkreload, checkedfile = self.checkreloadfile(filename)
                 if checkreload:
@@ -185,12 +176,14 @@ class MainLoop(QtCore.QThread):
 
     def runcommand(self):
         if self.module != None:
-            fun = getattr(self.module, self.get_test_fun_name())
             try:
+                fun = getattr(self.module, self.get_test_fun_name())
                 self.tracer = tracer.Tracer()
                 self.tracer.install()
                 fun()
                 self.tracer.uninstall()
+                # Reset trace so it is recomputed
+                self.trace_file_date = None
             except Exception, e:
                 print traceback.format_exc(e)
                 exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -220,15 +213,18 @@ class MainLoop(QtCore.QThread):
 
         modified = self.modulechanged()
 
+        if modified:
+            self.display.reset()
+
         self.loadMainModule()
 
-        modified = modified or self.singlePrepare()
+        modified_single = self.singlePrepare()
+
+        modified = modified or modified_single
 
         if not first:
             if not modified:
                 return
-        # Reset trace so it is recomputed
-        self.trace_file_date = None
         self.run_finished = False
 
         self.display.start()
@@ -236,8 +232,8 @@ class MainLoop(QtCore.QThread):
         if self.rollbackImporter:
             self.rollbackImporter.cleanup(self.display)
 
-
         self.singleRun()
+
 
     def trace_query_check_write(self, query_string, content):
         filename = jarvis.get_filename(jarvis.INSPECT_VAR_QUERY_RESPONSE)
@@ -256,7 +252,6 @@ class MainLoop(QtCore.QThread):
         filedate = os.path.getmtime(filename)
         if hasattr(self, "trace_file_date") and filedate == self.trace_file_date:
             return
-
 
         try:
             query_string = open(filename).read()
@@ -283,6 +278,7 @@ class MainLoop(QtCore.QThread):
         ret = new_ret
 
         self.trace_query_check_write(query_string, str(ret))
+#        self.trace_query.inspect_all()
 
     def run_(self):
         while(not self.finished):

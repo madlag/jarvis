@@ -9,19 +9,20 @@ import osgDB
 import osg
 import shutil
 import jarvis
+import traceback
 
 class MyTextEdit(QtGui.QTextEdit):
     def __init__(self, text, father):
         super(MyTextEdit, self).__init__(text, father)
 #    def keyPressEvent(self, event):
 #        print event
-    
+
 class JarvisMain(QtGui.QWidget):
-    
+
     def __init__(self, layout=None):
         self.osg_enable = True
         super(JarvisMain, self).__init__()
-        
+
         self.initUI(layout)
 
     def message(self, object):
@@ -31,6 +32,7 @@ class JarvisMain(QtGui.QWidget):
             kwargs = object.get("kwargs", {})
             getattr(self, fun_name)(*args, **kwargs)
         except:
+            print traceback.format_exc()
             pass
 
     def start(self):
@@ -39,7 +41,7 @@ class JarvisMain(QtGui.QWidget):
 
     def finish(self):
         pass
-    
+
     def display(self):
         print self.editor.toPlainText()
 
@@ -55,7 +57,7 @@ class JarvisMain(QtGui.QWidget):
         editor.setMinimumHeight(height)
         return editor
 
-    def createOSG(self, width, height):        
+    def createOSG(self, width, height):
         osgWidget = osgqt.PyQtOSGWidget(self)
         osgWidget.setMinimumWidth(width)
         osgWidget.setMinimumHeight(height)
@@ -68,7 +70,7 @@ class JarvisMain(QtGui.QWidget):
             parts = line.split("=")
             ret[parts[0]] = int(parts[1])
         return ret
-                
+
     def initUI(self, layout=None):
         self.setWindowTitle('Jarvis')
 
@@ -93,7 +95,7 @@ class JarvisMain(QtGui.QWidget):
         self.topBox.setContentsMargins(0,0,0,0)
         self.topBox.setSpacing(0)
         self.topBox.setGeometry(QtCore.QRect(0, 0, WIDTH, HEIGHT))
-  
+
 #        self.editor = self.createEditor(text, 300, 600)
 #        self.editor.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 #        self.topBox.addWidget(self.editor)
@@ -105,7 +107,7 @@ class JarvisMain(QtGui.QWidget):
 
         self.error = self.createEditor("", WIDTH, 200)
         self.debug = self.createEditor("", WIDTH, 200)
-        
+
         if self.osg_enable:
             self.osgView = self.createOSG(WIDTH, int(WIDTH * 9 / 16.0))
 
@@ -124,7 +126,7 @@ class JarvisMain(QtGui.QWidget):
         f = open(filename + ".tmp", "w")
         f.write(text)
         f.close()
-        shutil.move(filename + ".tmp", filename)        
+        shutil.move(filename + ".tmp", filename)
 
     def debugprint(self, *args):
         text = " ".join(map(lambda x: str(x), args))
@@ -133,7 +135,7 @@ class JarvisMain(QtGui.QWidget):
 
         debug_file = jarvis.get_filename(jarvis.DEBUG_FILE)
         self.atomic_write(debug_file, text + "\n")
-        
+
     def errorprint(self, *args):
         text = " ".join(map(lambda x: str(x), args))
         self.error.append(text)
@@ -141,6 +143,11 @@ class JarvisMain(QtGui.QWidget):
 
         error_file = jarvis.get_filename(jarvis.ERROR_FILE)
         self.atomic_write(error_file, text + "\n")
+
+    def reset(self):
+        self.debug.setText("")
+        self.error.setText("")
+        self.osgView.resetSceneData(None)
 
     def osgprint(self, data):
         self.osgView.setSceneData(data)

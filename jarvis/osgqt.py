@@ -224,6 +224,9 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         else:
             return time.time() - self.startTime
 
+    def resetSceneData(self, data):
+        self.viewer.setSceneData(None)
+
     def setSceneData(self, data):
         start = time.time()
 #        self.startTime = time.time()
