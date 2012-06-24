@@ -72,7 +72,7 @@ class MainLoop(QtCore.QThread):
         DELAY = 1
         if filedate > self.last_check_timestamp - DELAY:
             modified = True
-        
+
         return modified, checkedfile
 
     def checkreloadmodule(self, module):
@@ -191,7 +191,7 @@ class MainLoop(QtCore.QThread):
         if self.display != None:
             self.display.runcommand(self.runcommand)
 
-    def runloop(self):        
+    def runloop(self):
         if not self.run_finished:
             return
 
@@ -199,14 +199,14 @@ class MainLoop(QtCore.QThread):
             first = True
         else:
             first = False
-            
+
 
         modified = self.modulechanged()
         print "modified", modified
 
         if modified:
             self.display.reset()
-            
+
         self.loadMainModule()
 
         modified_single = self.singlePrepare()
