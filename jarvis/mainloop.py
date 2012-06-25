@@ -51,6 +51,9 @@ class MainLoop(QtCore.QThread):
         # Used to debug vars
         self.tracer = None
         self.file_dates = {}
+        self.trace_file_white_list = {}
+        # Set this flag to True to ask for a new run (True for the first run !)
+        self.force_run = True
 
     def add_watch_file(self, filename):
         self.watchfiles[filename] = True
@@ -161,7 +164,7 @@ class MainLoop(QtCore.QThread):
 
     def start_run(self):
         self.run_finished = False
-        
+
     def finish_run(self):
         self.run_finished = True
 
@@ -170,7 +173,7 @@ class MainLoop(QtCore.QThread):
             try:
                 self.last_run = time.time()
                 fun = getattr(self.module, self.get_test_fun_name())
-                self.tracer = tracer.Tracer()
+                self.tracer = tracer.Tracer(self.trace_file_white_list)
                 self.tracer.install()
                 fun()
                 self.tracer.uninstall()
@@ -201,24 +204,27 @@ class MainLoop(QtCore.QThread):
         if not self.run_finished:
             return
 
-        if self.module == None:
-            first = True
-        else:
-            first = False
+        modified_force = self.force_run
+        # Reset force_run
+        self.force_run = False
+        modified = modified_force
 
-        modified = self.modulechanged()
+        module_changed = self.modulechanged()
 
-        if modified:
+        if module_changed:
+            # The tested module changed, so we reset the set of files to be traced
+            self.trace_file_white_list = {}
             self.display.reset()
+
+        modified = modified or module_changed
 
         modified_single = self.singlePrepare()
 
         modified = modified or modified_single
 
-        if not first:
-            if not modified:
-                self.finish_run()
-                return
+        if not modified:
+            self.finish_run()
+            return
 
         self.loadMainModule()
 
@@ -252,12 +258,17 @@ class MainLoop(QtCore.QThread):
 
         try:
             query_string = open(filename).read()
+            query = query_string.split()
+            line = query[0]
+            file = query[1]
         except:
             return None
 
-        query = query_string.split()
-        line = query[0]
-        file = query[1]
+        if not self.tracer.istracing(file):
+            self.trace_file_white_list[file] = True
+            # Force a new run !!
+            self.force_run = True
+            return
 
         ret = self.tracer.inspect(file, int(line))
         if ret == None:
@@ -311,6 +322,3 @@ class MainLoop(QtCore.QThread):
             pass
         except Exception, e:
             print traceback.format_exc(e)
-
-
-

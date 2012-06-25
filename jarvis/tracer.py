@@ -16,9 +16,13 @@ import time
 import traceback
 
 class Tracer(object):
-    def __init__(self):
+    def __init__(self, file_white_list = None):
         self.run_info = {}
         self.last_trace_data_stack = [{}]
+        self.file_white_list = file_white_list
+
+    def istracing(self, filename):
+        return filename in self.file_white_list
 
     def create_new_run_info(self, file, line, data, dedupCheck):
         # Create the record for this file / line
@@ -38,7 +42,7 @@ class Tracer(object):
 
     def object_repr(self, object):
         return repr(object)
-        
+
     def trace_frame(self, frame, event, arg):
         """Trace a single frame.
         This try to determine which var changed, and at which time.
@@ -50,14 +54,19 @@ class Tracer(object):
             # Push empty last_trace data
             self.last_trace_data_stack += [{}]
 
-        # Get the right trace_data
-        last_trace_data = self.last_trace_data_stack[-1]
-        
+
         try:
             # Get the current file name and current line number
             filename = inspect.getfile(frame)
+
+            if self.file_white_list != None:
+                if filename not in self.file_white_list:
+                    return self.trace_frame
+
             linenumber = frame.f_lineno
-            
+            # Get the right trace_data
+            last_trace_data = self.last_trace_data_stack[-1]
+
             # Compare the locals with the previous ones
             new_trace_data = {}
 
@@ -73,12 +82,12 @@ class Tracer(object):
                         for vv in [self.object_repr(v)]:
                             try:
                                 # Check if last data is the same (object at index 0 is "framestamp")
-                                if last_trace_data[k][1] == vv:                                    
+                                if last_trace_data[k][1] == vv:
                                     same = True
                                 break
                             except:
                                 self.print_exception("CASE 1")
-                            
+
                     if not same:
                         # Not same: store the new version
                         for vv in [self.object_repr(v)]:
@@ -95,7 +104,7 @@ class Tracer(object):
 
                 except:
                     self.print_exception("CASE 3")
-                    
+
             # Create the record for this frame
             self.create_new_run_info(filename, linenumber, new_trace_data, event == "return")
         except:
@@ -103,9 +112,9 @@ class Tracer(object):
 
         if event == "return":
             self.last_trace_data_stack = self.last_trace_data_stack[:-1]
-            
+
         return self.trace_frame
-        
+
     def install(self):
         """Install the tracer"""
         self.start_time = time.time()
@@ -123,9 +132,9 @@ class Tracer(object):
             ret = self.run_info.get(file, {}).get(line + i)
             if ret:
                 return ret
-                        
+
         return ret
-        
+
     def inspect_all(self):
         """Dump all the information stored"""
         for k,v in self.run_info.iteritems():
@@ -135,5 +144,3 @@ class Tracer(object):
 
             for k in keys:
                 print "line = %s, data =%s" % (k, v[k])
-
-
