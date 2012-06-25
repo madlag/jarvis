@@ -50,8 +50,6 @@ class MainLoop(QtCore.QThread):
         self.run_finished = True
         # Used to debug vars
         self.tracer = None
-        self.last_check_timestamp = 0
-        self.new_check_timestamp = 0
         self.file_dates = {}
 
     def add_watch_file(self, filename):
@@ -62,7 +60,6 @@ class MainLoop(QtCore.QThread):
 
     def checkreloadfile(self, filename):
         modified = False
-        last_check_time = time.time()
         try:
             filedate = os.path.getmtime(filename)
             self.watchfiles[filename] = True
@@ -162,9 +159,11 @@ class MainLoop(QtCore.QThread):
 
         return modified
 
-    def validate_timestamp(self):
-        # Nothing to do : validate this timestamp
-        self.last_check_timestamp = self.new_check_timestamp
+    def start_run(self):
+        self.run_finished = False
+        
+    def finish_run(self):
+        self.run_finished = True
 
     def runcommand(self):
         if self.module != None:
@@ -183,10 +182,8 @@ class MainLoop(QtCore.QThread):
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 self.display.errorprint("%s:%s\n" % (fname, exc_tb.tb_lineno) + traceback.format_exc(e) + "\n")
             finally:
-                self.run_finished = True
-
                 # We are sure we have run code that was up to date = self.new_check_timestamp
-                self.validate_timestamp()
+                self.finish_run()
 
 
     def inspect_vars(self, file, line):
@@ -220,12 +217,12 @@ class MainLoop(QtCore.QThread):
 
         if not first:
             if not modified:
-                self.validate_timestamp()
+                self.finish_run()
                 return
 
         self.loadMainModule()
 
-        self.run_finished = False
+        self.start_run()
 
         self.display.start()
 
@@ -284,14 +281,9 @@ class MainLoop(QtCore.QThread):
         while(not self.finished):
 
             try:
-                # only record a new timestamp when previous run is finished ...
-                if self.last_check_timestamp == self.new_check_timestamp:
-                    # record at which time we started to check if files were modified
-                    self.new_check_timestamp = time.time()
-                    self.runloop()
-
+                 self.runloop()
             except:
-                self.validate_timestamp()
+                self.finish_run()
                 print traceback.format_exc()
                 if self.display != None:
                     self.display.start()
