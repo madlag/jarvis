@@ -52,6 +52,7 @@ class MainLoop(QtCore.QThread):
         self.tracer = None
         self.last_check_timestamp = 0
         self.new_check_timestamp = 0
+        self.file_dates = {}
 
     def add_watch_file(self, filename):
         self.watchfiles[filename] = True
@@ -61,6 +62,7 @@ class MainLoop(QtCore.QThread):
 
     def checkreloadfile(self, filename):
         modified = False
+        last_check_time = time.time()
         try:
             filedate = os.path.getmtime(filename)
             self.watchfiles[filename] = True
@@ -68,10 +70,12 @@ class MainLoop(QtCore.QThread):
         except OSError:
             return False, None
 
-        # We add a delay of 1s as gmtime is often rounded to the nearest second ??
-        DELAY = 1
-        if filedate > self.last_check_timestamp - DELAY:
+        old_file_date = self.file_dates.get(filename)
+
+        if old_file_date != None and old_file_date != filedate:
             modified = True
+
+        self.file_dates[filename] = filedate
 
         return modified, checkedfile
 
@@ -84,14 +88,9 @@ class MainLoop(QtCore.QThread):
 
         if filename == None:
             return False, []
-#        if "common" in filename:
-#        print "checkreloadmodule", filename
 
         if filename.endswith(".pyc"):
             filename = filename[:-1]
-
-#        if "test_" in filename:
-#            print "HERE !!"
 
         modified = False
         for suffix in [""]:
@@ -163,9 +162,14 @@ class MainLoop(QtCore.QThread):
 
         return modified
 
+    def validate_timestamp(self):
+        # Nothing to do : validate this timestamp
+        self.last_check_timestamp = self.new_check_timestamp
+
     def runcommand(self):
         if self.module != None:
             try:
+                self.last_run = time.time()
                 fun = getattr(self.module, self.get_test_fun_name())
                 self.tracer = tracer.Tracer()
                 self.tracer.install()
@@ -181,6 +185,10 @@ class MainLoop(QtCore.QThread):
             finally:
                 self.run_finished = True
 
+                # We are sure we have run code that was up to date = self.new_check_timestamp
+                self.validate_timestamp()
+
+
     def inspect_vars(self, file, line):
         if self.tracer == None:
             return None
@@ -190,6 +198,7 @@ class MainLoop(QtCore.QThread):
     def singleRun(self):
         if self.display != None:
             self.display.runcommand(self.runcommand)
+
 
     def runloop(self):
         if not self.run_finished:
@@ -205,15 +214,17 @@ class MainLoop(QtCore.QThread):
         if modified:
             self.display.reset()
 
-        self.loadMainModule()
-
         modified_single = self.singlePrepare()
 
         modified = modified or modified_single
 
         if not first:
             if not modified:
+                self.validate_timestamp()
                 return
+
+        self.loadMainModule()
+
         self.run_finished = False
 
         self.display.start()
@@ -273,18 +284,19 @@ class MainLoop(QtCore.QThread):
         while(not self.finished):
 
             try:
-                # record at which time we started to check if files were modified
-                self.new_check_timestamp = time.time()
-                self.runloop()
+                # only record a new timestamp when previous run is finished ...
+                if self.last_check_timestamp == self.new_check_timestamp:
+                    # record at which time we started to check if files were modified
+                    self.new_check_timestamp = time.time()
+                    self.runloop()
+
             except:
+                self.validate_timestamp()
                 print traceback.format_exc()
                 if self.display != None:
                     self.display.start()
                     self.display.errorprint(traceback.format_exc())
                     self.display.finish()
-            finally:
-                # We are sure we have run code that was up to date = self.new_check_timestamp
-                self.last_check_timestamp = self.new_check_timestamp
 
             try:
                 self.trace_query_check()
