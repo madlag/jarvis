@@ -19,13 +19,14 @@
           <a id="forkme_banner" href="https://github.com/madlag/jarvis">View on GitHub</a>
 
           <h1 id="project_title">Jarvis</h1>
-          <h2 id="project_tagline">Python development companion.</h2>
+          <h2 id="project_tagline">Python coding companion.</h2>
 
+<!--
           <section id="header_links">
             <a class="project_link" href="manual.html">Manual<a>
             <a class="project_link" href="manual.html">Manual<a>
           </section>
-
+-->
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/madlag/jarvis/zipball/master">Download this project as a .zip file</a>
               <a class="tar_download_link" href="https://github.com/madlag/jarvis/tarball/master">Download this project as a tar.gz file</a>
@@ -40,20 +41,31 @@
 
 <p>Jarvis was inspired by works of <a href="http://worrydream.com/">Bret Victor</a>, especially his talk <a href="http://www.youtube.com/watch?v=PUv66718DII">Inventing on Principle</a>.
 The central idea is that the feedback loop when you are coding should be the shortest possible, so you can see the effect of your code changes instantly, or almost.
-Jarvis implements a (small) subset of these ideas.</p>
+Jarvis implements a (small ?) subset of these ideas.</p>
 
-<h1>What is Jarvis</h1>
+<h1>What can I do with jarvis ? </h1>
+<p>The best way to discover it is to watch the demo video.</p>
 
+<iframe width="560" height="315" src="http://www.youtube.com/embed/W8YVIQUB_tI" frameborder="0" allowfullscreen></iframe>
+
+<h1>How would you define Jarvis ? </h1>
 <p>Jarvis is a Python programming companion. Point it to a python function, and it will execute it.
 As soon as you change your code in your favorite text editor, Jarvis will detect it, and will rerun the function, using some nice Python tricks to reload code without rerunning the full interpreter.</p>
 
 <p>You can insert in your code some debug statements, that will be displayed in the Jarvis interface. If an exception is raised, it will be shown as well.</p>
 
 <p>Last, but not least, if you are using <a href="http://www.openscenegraph.org/">OpenSceneGraph</a>  Python bindings, you will be able to output an OSG tree to the Jarvis interface. This way, you can instantly see the new 3D scene your code is generating, in a way similar to the talk "Inventing on Principle".</p>
+<p>There are a lot of cool additions, like live variable inspections, time scrubbing in the OSG window etc. And more to come ! </p>
+
+<h1>Documentation</h1>
+
+<p>You will find a more extensive documentation at <a href="http://jarvis.readthedocs.org/">Jarvis Read The Docs</a>.</p>
 
 <h1>Requirements</h1>
 
-<p>Jarvis uses <a href="http://qt.nokia.com/downloads">Qt</a> &amp; <a href="http://wiki.python.org/moin/PyQt">PyQt</a>,  <a href="http://www.openscenegraph.org/">OpenSceneGraph</a> &amp; <a href="http://code.google.com/p/osgswig/">osgswig</a>.</p>
+<p>Jarvis uses <a href="http://qt.nokia.com/downloads">Qt</a> &amp; <a href="http://wiki.python.org/moin/PyQt">PyQt</a>,  <a href="http://www.openscenegraph.org/">OpenSceneGraph</a> &amp; <a href="http://code.google.com/p/osgswig/">osgswig</a>. </p>
+<p>You will need <a href="http://pymacs.progiciels-bpi.ca/index.html">Pymacs</a> if you want to use the emacs bindings, and <a href="http://jinja.pocoo.org/">Jinja2</a> if you want to use the code snippets tools.</p>
+
 
 <h1>Installation</h1>
 
