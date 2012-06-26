@@ -5,9 +5,13 @@ The central idea is that the feedback loop when you are coding should be the sho
 Jarvis implements a (small) subset of these ideas.
 
 == Demo Video == 
-You can find a demo at [http://madlag.github.com/jarvis/ ]
+You can find a demo at [http://madlag.github.com/jarvis/ ], and some additional content.
 
-== What is Jarvis ==
+== Full documentation ==
+
+You will find it at [http://jarvis.readthedocs.org/ Jarvis Read The Docs].
+
+== How would you define Jarvis ? ==
 
 Jarvis is a Python programming companion. Point it to a python function, and it will execute it.
 As soon as you change your code in your favorite text editor, Jarvis will detect it, and will rerun the function, using some nice Python tricks to reload code without rerunning the full interpreter.
