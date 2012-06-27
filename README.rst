@@ -31,7 +31,7 @@ Those ideas are also used in the `Light Table`_ KickStarter project.
 Installing
 ==========
 1. install qt, pyqt, osg, osgswig
-2. install pymacs an jinja2 if you want to use emacs bindings
+2. install pymacs and jinja2 if you want to use emacs bindings
 3. ``pip install jarvis``
 4. ``jarvis -c my_python_file.py:main``
 5. Enjoy !
