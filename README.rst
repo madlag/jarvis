@@ -39,4 +39,4 @@ Installing
 
 Full  Documentation
 ============
-You will find the full documentation at `Jarvis Read The Docs`_.
+You will find the full documentation at `Jarvis Read TheDocs`_ .
