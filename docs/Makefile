@@ -153,4 +153,4 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 rtd:
-	wget --post-data "foo=bar" -O - http://readthedocs.org/build/3804 > /dev/null
+	wget --post-data "foo=bar" -O - http://readthedocs.org/build/3804 
