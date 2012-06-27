@@ -14,6 +14,7 @@ import traceback
 class MyTextEdit(QtGui.QTextEdit):
     def __init__(self, text, father):
         super(MyTextEdit, self).__init__(text, father)
+#        self.setFontPointSize(20)
 #    def keyPressEvent(self, event):
 #        print event
 
@@ -78,8 +79,6 @@ class JarvisMain(QtGui.QWidget):
             layout = self.parse_layout(layout)
         else:
             layout = {}
-
-        print layout
 
         WIDTH=480
         HEIGHT=1024

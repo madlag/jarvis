@@ -6,6 +6,7 @@ if 'arg' in globals():
     from Pymacs import lisp
     import jarvis.emacs.utils as utils
     import jarvis.commands
+    reload(utils)
 
     # Retrieve current buffer file name
     filename = lisp.buffer_file_name()
