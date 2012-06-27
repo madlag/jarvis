@@ -6,6 +6,7 @@ Jarvis: a python coding companion
 .. _`Bret Victor`: http://worrydream.com/ 
 .. _`Inventing on Principle`: http://www.youtube.com/watch?v=PUv66718DII
 .. _`Light Table`: http://www.kickstarter.com/projects/ibdknox/light-table
+.. _`Jarvis Read The Docs`:http://jarvis.readthedocs.org/en/latest/index.html
 
 Jarvis is a Python coding companion. Point it to a python function, and it will execute it. As soon as you change and save your code, Jarvis will detect it, and will rerun the function.
 
@@ -36,12 +37,6 @@ Installing
 5. Enjoy !
 
 
-Full Content
+Full  Documentation
 ============
-.. toctree::
-   :maxdepth: 3
-
-   tutorial
-   commands
-   emacs  
-
+You will find the full documentation at `Jarvis Read The Docs`_.
