@@ -16,6 +16,8 @@ If you insert some debugging statements in your code, they will be displayed in 
 
 Last, but not least, if you are using OpenSceneGraph_ Python bindings, you will be able to output an OSG tree to the Jarvis interface. This way, you can instantly see the new 3D scene your code is generating.
 
+Demo Video
+==========
 You can have a better description and a *demo video* on the `Jarvis Front Page`_.
 
 Inspiration
