@@ -14,8 +14,8 @@ Jarvis commands are available through the ``jarvis.commands`` module.
 Displaying data
 ---------------
 
-Those functions are use to display data in the Jarvis panells.
-All displayed strings are prefixed by a timestamp.
+These functions are use to display data in the Jarvis panels.
+All displayed strings are prefixed with a timestamp.
 
 .. py:function:: debug(\*args):
 
@@ -46,7 +46,7 @@ All displayed strings are prefixed by a timestamp.
 
    print an error in the error panel if any of the unittest result has an error or a failure
 
-Here is a typical use of this function, given a unittest class called TestMyModule this is:
+Here is a typical use of this function, given a unittest class called TestMyModule:
 
 .. code-block:: python
 
@@ -78,7 +78,7 @@ Adding files to monitor for change
 ----------------------------------
 .. py:function:: add_watch_file
 
-    Add a file to be watched by Jarvis. As soon as this file change, the full code is reexecuted.
+    Add a file to be watched by Jarvis. As soon as the file changes, the full code is reexecuted.
 
 # Misc
 replace_this
