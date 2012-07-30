@@ -18,7 +18,7 @@ class RollbackImporter:
         if len(name) <= len(result.__name__):
            name = copy.copy(result.__name__)
 
-        black_list = ["stashy"] #, "sentry", "raven", "logging", "warnings"]
+        black_list = ["stashy", "unittest"] #, "sentry", "raven", "logging", "warnings"]
         
         for b in black_list:
             if b in name:
