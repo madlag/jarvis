@@ -1,6 +1,5 @@
 import jarvis
 import inspect
-from lxml import etree
 import os
 import time
 
@@ -25,6 +24,7 @@ def delta_time_format():
 def error(*args):
     if jarvis.ml != None and jarvis.ml.display != None:
         jarvis.ml.display.errorprint(delta_time_format(), *args)
+    print " ".join(args)
 
 def reset_start_time():
     global start_time
@@ -41,7 +41,8 @@ def debug_dir(object, filt = None):
             debug(k)
 
 def debug_xml(*args):
-    debug(*(list(args[:-1]) + [etree.tostring(args[-1], pretty_print = True)]))
+    import lxml
+    debug(*(list(args[:-1]) + [lxml.etree.tostring(args[-1], pretty_print = True)]))
 
 def debug_osg(osgdata):
     if jarvis.ml != None and jarvis.ml.display != None:
