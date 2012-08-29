@@ -24,6 +24,7 @@ import osg, osgDB, osgGA, osgViewer
 from PyQt4 import QtOpenGL
 from PyQt4 import Qt, QtGui, QtCore
 import time
+import osgUtil
 
 mouseButtonDictionary = {
     QtCore.Qt.LeftButton: 1,
@@ -98,6 +99,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def resetCamera(self, viewer):
 
         camera = viewer.getCamera()
+        camera.setComputeNearFarMode(False)
 #        camera = osg.Camera()
         camera.setViewport(osg.Viewport(0,0, self.width(), self.height()))
 #        camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
@@ -123,6 +125,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+        camera.setComputeNearFarMode(osgUtil.CullVisitor.DO_NOT_COMPUTE_NEAR_FAR)
 
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
