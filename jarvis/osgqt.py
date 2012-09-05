@@ -125,7 +125,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-        camera.setComputeNearFarMode(osgUtil.CullVisitor.DO_NOT_COMPUTE_NEAR_FAR)
+        camera.setComputeNearFarMode(False)
 
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
