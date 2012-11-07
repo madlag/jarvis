@@ -107,7 +107,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))
         cameraPosition = [0.0, 0.0, CAMERA_Z_TRANSLATE]
 
-        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE,float(self.width())/float(self.height()), 1.0, 10000.0)
+        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE,float(self.width())/float(self.height()), 0.1, 100.0)
 
         eye = osg.Vec3d(cameraPosition[0], cameraPosition[1], cameraPosition[2])
         center = osg.Vec3d(0,0,0)
@@ -125,8 +125,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-        camera.setComputeNearFarMode(osgUtil.CullVisitor.DO_NOT_COMPUTE_NEAR_FAR)
-
+        camera.setComputeNearFarMode(False)
+        
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
 
