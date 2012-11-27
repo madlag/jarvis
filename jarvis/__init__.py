@@ -20,11 +20,11 @@ def get_home():
     except OSError, e:
         if e.errno != 17:
             raise
-        
+
     return jarvis_home
 
 def get_filename(key):
-    error_file = os.path.join(get_home(), key)    
+    error_file = os.path.join(get_home(), key)
     return error_file
 
 def run(filename_function, layout=None):
@@ -39,14 +39,32 @@ def run(filename_function, layout=None):
         ml.setdisplay(display)
 
         display.init()
-        
+
     except KeyboardInterrupt:
         pass
     except Exception, e:
         print traceback.format_exc(e)
     finally:
         display.destroy()
-        
+
+
+
+import code, traceback, signal
+
+def debug(sig, frame):
+    """Interrupt running process, and provide a python prompt for
+    interactive debugging."""
+    d={'_frame':frame}         # Allow access to frame object.
+    d.update(frame.f_globals)  # Unless shadowed by global
+    d.update(frame.f_locals)
+
+    i = code.InteractiveConsole(d)
+    message  = "Signal recieved : entering python shell.\nTraceback:\n"
+    message += ''.join(traceback.format_stack(frame))
+    i.interact(message)
+
+def listen():
+    signal.signal(signal.SIGUSR1, debug)  # Register handler
 
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
@@ -58,6 +76,7 @@ def main():
     run(args.filename_function, args.layout)
 
 if __name__ == "__main__":
+    listen()
     main()
 
 
