@@ -19,3 +19,6 @@ class Lisp(object):
 
     def j_test_filename_function_set(self, *args, **kwargs):
         pass
+
+    def insert(self, s):
+        print s

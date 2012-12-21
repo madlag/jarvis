@@ -82,7 +82,7 @@ class JarvisMain(QtGui.QWidget):
 
         WIDTH=480
         HEIGHT=1024
-        self.setGeometry(1440 - WIDTH, 0, WIDTH, 1024)
+        self.setGeometry(1680 - WIDTH, 0, WIDTH, 1050)
 
 #        self.setWindowIcon(QtGui.QIcon('web.png'))
 

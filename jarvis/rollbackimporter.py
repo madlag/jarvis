@@ -21,7 +21,7 @@ class RollbackImporter:
         black_list = ["stashy", "unittest"] #, "sentry", "raven", "logging", "warnings"]
         
         for b in black_list:
-            if b in name:
+            if b in name.lower():
                 return result
 
         # Remember import in the right order

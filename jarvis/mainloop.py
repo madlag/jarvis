@@ -252,6 +252,9 @@ class MainLoop(QtCore.QThread):
         filename = jarvis.get_filename(jarvis.INSPECT_VAR_QUERY)
 
         # Check date of trace file, not to redo work for nothing
+        if not os.path.exists(filename):
+            return
+
         filedate = os.path.getmtime(filename)
         if hasattr(self, "trace_file_date") and filedate == self.trace_file_date:
             return

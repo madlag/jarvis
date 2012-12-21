@@ -11,7 +11,8 @@ Launch this command in a given  code buffer, it will create the test with it
 
 # Retrieve current buffer file name
 filename = lisp.buffer_file_name()
-
+if filename == None:
+    raise Exception("Please open the file where you want to create the test or select a file for which you want to create a test.")
 filename = os.path.abspath(filename)
 
 # Find the test path
@@ -28,12 +29,16 @@ if test_path == None:
 # Find the point where tests and current file names diverge
 BASE = os.path.abspath(os.path.join(test_path, ".."))
 
-# Try to infer the small name for the module and so the test file name
-if filename.startswith(BASE):
-    parts = filename[len(BASE) + 1:-3].split("/")
-    testfilename = os.path.join(test_path, "_".join(parts), "test_" + "_".join(parts) + ".py")
+if "test" not in filename:
+    # Try to infer the small name for the module and so the test file name
+    if filename.startswith(BASE):
+        parts = filename[len(BASE) + 1:-3].split("/")
+        testfilename = os.path.join(test_path, "_".join(parts), "test_" + "_".join(parts) + ".py")
+    else:
+        testfilename = lisp.read_file_name("Where should I create this test ?", os.path.join(test_path, "test.py") )
 else:
-    testfilename = lisp.read_file_name("Where should I create this test ?", os.path.join(test_path, "test.py") )
+    testfilename = filename
+
 
 # Create the test directory
 try:
@@ -45,7 +50,7 @@ except OSError, e:
 
 
 utils.create_init_files(testfilename)
-            
+
 # Test if the test file name exists
 if os.path.exists(testfilename) and False:
     lisp.message("Test %s already exists" % testfilename)
@@ -54,11 +59,13 @@ else:
 
     snippetdirnames = utils.get_snippet_dir_names()
     tests = []
-    for snippetdirname in snippetdirnames:    
+#    raise Exception(str(snippetdirnames))
+
+    for snippetdirname in snippetdirnames:
         tests += [t for t in os.listdir(snippetdirname)]
-        
-    tests = filter(lambda x: x.startswith("test_") and x.endswith("_create.py"), tests)
-    tests = map(lambda x:x[5:-10], tests)
+
+    tests = filter(lambda x: x.startswith("test_") and x.endswith("_create"), tests)
+    tests = map(lambda x:x[5:-7], tests)
 
     # Ask for the kind of test to create
     testtypename = lisp.completing_read("What kind of test do you want to create ?", tests)
@@ -68,7 +75,7 @@ else:
     # Create the test filename
     f = open(testfilename, "w")
 
-    # Find the variable names 
+    # Find the variable names
     module = module_name
     shortmodule = module_name.split(".")[-1]
     testclassname = "".join(map(lambda x: x.capitalize(), module_name.split(".")))

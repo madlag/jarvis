@@ -1,5 +1,4 @@
 import copy
-from jarvis.commands import debug, debug_dir
 import traceback
 import os
 import os.path
@@ -38,7 +37,7 @@ class Conf:
 
     def read(self):
         """Read the configuration files after reading the defaults"""
-        for k,v in self.defaults.iteritems():
+        for key,value in self.defaults.iteritems():
             self.set_key_value(key, value)
 
         # Enumerate the pathes
@@ -66,9 +65,13 @@ class Conf:
         else:
             return False            
     
-def load(name, pathes = [], defaults = {}):
-    pathes = copy.deepcopy(pathes)
-    pathes += ["/etc/%s/conf.py" % name]
-    pathes +=  [os.path.join(os.getenv("HOME"), "." + name, "conf.py")]
+def load(name, pathes = None, defaults = {}):
+    if pathes == None:
+        pathes = []
+        pathes += ["/etc/%s/conf.py" % name]
+        pathes +=  [os.path.join(os.getenv("HOME"), "." + name + ".d", "conf.py")]
+    else:
+        pathes = copy.deepcopy(pathes)
+
     globals()[name] = Conf(pathes, defaults = defaults)
     

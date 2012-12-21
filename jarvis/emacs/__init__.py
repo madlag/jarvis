@@ -100,8 +100,8 @@ snippetdirnames = get_dirs("snippets")
 for snippetdirname in snippetdirnames:
     # Enumerate the snippets
     for f in os.listdir(snippetdirname):
-        if f.endswith(".py"):
-            commandname = f[:-3]
+        if not f.endswith('~'):
+            commandname = f
             commandfilename = os.path.join(snippetdirname, f)
             if commandname not in globals():
                 globals()[commandname] = SnippetWrap(commandfilename)

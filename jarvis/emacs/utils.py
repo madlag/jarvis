@@ -16,9 +16,12 @@ def get_snippet_dir_names():
 
 def load_snippet(commandname, **kwargs):
     for snippetdirname in snippetdirnames:
-        commandfilename = os.path.join(snippetdirname, commandname + ".py")
-        if os.path.exists(commandfilename):
-            break
+        for suffix in ["", ".py"]:
+            commandfilename = os.path.join(snippetdirname, commandname + suffix)
+
+            if os.path.exists(commandfilename):
+                break
+
     s = open(commandfilename).read()
 
     template = jinja2.Template(s)

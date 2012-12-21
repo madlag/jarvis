@@ -34,6 +34,8 @@ setup(name='jarvis',
     install_requires=install_requires,
     entry_points={
         'console_scripts':
-            ['jarvis=jarvis:main', 'jarvis_command_run=jarvis.emacs.utils:command_run']
+            ['jarvis=jarvis:main',
+             'jarvis_command_run=jarvis.emacs.utils:command_run',
+             'jarvis_server=jarvis.server:main']
     }
 )
