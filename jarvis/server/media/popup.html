@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Jarvis popup</title>
+    <script src="mootools-core-1.4.5.js"></script>
+    <script src="mootools-more-1.4.0.1.js"></script>
+    <script>
+      var uri = new URI();
+      var query = uri.get("query")
+      var dict = query.parseQueryString();
+      var defaultDict = Object({'width':300, 'height':window.screen.availHeight, 'screenwidth':window.screen.availWidth, 'screenheight':window.screen.availHeight})
+
+      dict = Object.merge(defaultDict, dict)
+      var left = dict.screenwidth - dict.width;
+
+      window.open("http://127.0.0.1:9017/static/index.html", 'Jarvis', 'width=' + dict.width + ',height=' + dict.height + ',left='+left);
+      window.close()
+    </script>
+</head>
+</html>

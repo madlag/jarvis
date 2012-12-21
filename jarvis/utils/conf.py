@@ -72,6 +72,5 @@ def load(name, pathes = None, defaults = {}):
         pathes +=  [os.path.join(os.getenv("HOME"), "." + name + ".d", "conf.py")]
     else:
         pathes = copy.deepcopy(pathes)
-
     globals()[name] = Conf(pathes, defaults = defaults)
     

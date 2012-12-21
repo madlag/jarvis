@@ -21,6 +21,7 @@ class Frontend(object):
                 'pyramid.debug_notfound': 'true'
             })
             logfile = open("/tmp/jarvis.log", "w")
+
             self.wsgi_server = WSGIServer(("127.0.0.1", 9017), wsgi_app, log=logfile)
             if forever:
                 self.wsgi_server.serve_forever()
@@ -42,4 +43,5 @@ class Frontend(object):
         static_path = op.join(op.dirname(__file__), "media")
         config.add_static_view(name='static', path=static_path)
         config.scan()
+
         return config.make_wsgi_app()

@@ -11,7 +11,6 @@ import mox
 import jarvis.server.broker as broker
 import jarvis.utils.conf as conf
 
-conf.load("jarvis", defaults = {"REDIS_DB":10})
 
 this_dir = op.dirname(__file__)
 data_dir = op.join(this_dir, "data")
@@ -19,6 +18,8 @@ tmp_dir = op.join(this_dir, "tmp")
 
 class TestJarvisServerBroker(unittest.TestCase):
     def setUp(self):
+        conf.load("jarvis", defaults = {"REDIS_DB":10})
+
         # Refresh the temporary directory
         try:
             shutil.rmtree(tmp_dir, True)

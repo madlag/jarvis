@@ -21,7 +21,6 @@ def decode_state(value):
 # Update a state
 @view_config(route_name='state_update', request_method="POST")
 def state_post(context, request):
-    print "STATE_POST"
     id = request.matchdict["id"]
     object_type = request.POST.get('type', 'string')
     operation_type = request.POST.get("op", "set")
