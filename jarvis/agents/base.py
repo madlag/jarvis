@@ -4,7 +4,7 @@ import jarvis.client as client
 
 conf.load("jarvis")
 
-class Service(object):
+class Agent(object):
     def __init__(self):
         # Build the name parts
         parts = ["agents", self.__class__.__name__.lower()]
@@ -28,3 +28,4 @@ class Service(object):
         
         
         
+
