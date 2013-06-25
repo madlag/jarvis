@@ -37,7 +37,7 @@ def display_reset():
 
 def debug(*args):
     msg = " ".join(map(lambda x : str(x), args))
-    print client.Client().update("debug", "append", msg + "<br/>")
+#    client.Client().update("debug", "append", msg + "<br/>")
 
 def debug_dir(object, filt = None):
     debug("debug_dir", object, filt)
@@ -54,6 +54,7 @@ def debug_osg(osgdata):
         jarvis.ml.display.osgprint(osgdata)
 
 def debug_osg_set_loop_time(loop_time):
+    return
     if jarvis.ml != None and jarvis.ml.display != None:
         jarvis.ml.display.setlooptime(loop_time)
 
@@ -64,10 +65,12 @@ def testunit_result(result):
         error(err[1])
 
 def get_osg_viewer():
+    return
     if jarvis.ml != None and jarvis.ml.display != None:
         return jarvis.ml.display.getosgviewer()
 
 def add_watch_file(filename):
+    return
     if jarvis.ml != None:
         return jarvis.ml.add_watch_file(filename)
 

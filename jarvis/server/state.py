@@ -57,6 +57,8 @@ class StringObject(StateObject):
         return self.create_operation("set", None, {"content":content})
 
     def append_operation(self, content):
+        if self.value == None:
+            self.value = ""
         self.value += content
         return self.create_operation("append", None, {"content":content})
 

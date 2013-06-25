@@ -17,6 +17,7 @@ class BaseStateObserver(gevent.Greenlet):
 
         self.wake_up_channel = "-".join([user, session if session else self.random_session(), "wakeup"])
         self.ready = False
+        self.initial_ids = []
 
     def random_session(self):
         return utils.generate_random(10)
@@ -43,6 +44,7 @@ class BaseStateObserver(gevent.Greenlet):
         brok = broker.Broker()
         publisher = brok.publisher()
         publisher.publish(self.wake_up_channel, {"id":id, "op":"listen"})
+        self.initial_ids += [id]
 
     def prepare(self):
         pass
@@ -56,6 +58,7 @@ class BaseStateObserver(gevent.Greenlet):
         self.subscriber = self.state.subscriber()
         self.lastTime = {}
 
+        # TODO : lock to avoid multiple 
         # Subscribe to the "wake-up" signal
         self.subscriber.subscribe(self.wake_up_channel)
         self.ready = True
@@ -63,6 +66,19 @@ class BaseStateObserver(gevent.Greenlet):
         self.prepare()
 
         try:
+            # Add initial ids
+            for id in self.initial_ids :
+                self.subscriber.subscribe(self.state.id_to_key(id))
+
+                try:
+                    operation = self.state.get_agregated_operation(id)
+                except KeyError:
+                    # We will only get subscribe messages, as the object does exist yet
+                    continue
+
+                self.emit(operation)
+                self.lastTime[id] = operation["time"]
+            
             # Create top level redis dict
             for operation in self.subscriber:
                 operation = operation[1]

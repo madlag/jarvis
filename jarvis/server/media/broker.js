@@ -45,7 +45,7 @@ Broker = new Class({
       this.session_id = session_id;
       this.event_source = new EventSource(this.base_url);
       this.event_source.addEventListener('open', this.open.bind(this));
-      this.event_source.addEventListener('message', this.message.bind(this));
+      this.event_source.addEventListener('message', this.message_recv.bind(this));
       this.event_source.addEventListener('error', this.error.bind(this));
 
       this.dispatch_table = new Hash();
@@ -55,7 +55,11 @@ Broker = new Class({
 //      document.body.innerHTML += 'opened: ' + this.base_url;
   },
 
-  message: function (event) {
+  message: function (id, data) {
+
+  },
+
+  message_recv: function (event) {
       var msg = JSON.parse(event.data);
       name = msg.id;
       if (this.dispatch_table.has(name)) {

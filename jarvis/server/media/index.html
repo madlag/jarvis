@@ -4,10 +4,12 @@
     <meta charset="utf-8" />
     <title>Jarvis</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" type="text/css" href="main.css">
     <script src="eventsource.js"></script>
     <script src="mootools-core-1.4.5.js"></script>
     <script src="mootools-more-1.4.0.1.js"></script>
     <script src="broker.js"></script>
+    <script src="texteditor.js"></script>
     <script>
       broker = new Broker('http://127.0.0.1:9017/state/stream/eventsource/', Math.random());
 
@@ -17,6 +19,14 @@
 </head>
 <body>
 <h1>Debug</h1>
+<div id="editor">function foo(items) {
+    var x = "All this is syntax highlighted";
+    return x;
+}</div>
 <div id="debug" />
+<script src="http://rawgithub.com/ajaxorg/ace-builds/master/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = new TextEditor(broker, "editor");
+</script>
 </body>
 </html>

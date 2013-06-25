@@ -2,13 +2,12 @@ import os
 import os.path
 import sys
 import time
-import traceback
-from PyQt4 import QtCore
 import jarvis
 import rollbackimporter
 import imp
 import errno
 import tracer
+import traceback
 
 class Display():
     def __init__(self):
@@ -35,12 +34,9 @@ class Display():
         print "INFO", info
 
 
-class MainLoop(QtCore.QThread):
-    def __init__(self, filename_function, display = None):
-        QtCore.QThread.__init__(self)
-
-        self.filename_function = filename_function
-        self.finished = False
+class MainLoop:
+    def __init__(self, display = None):
+        self.filename_function = None
         self.display = display
         self.module = None
 
@@ -107,7 +103,6 @@ class MainLoop(QtCore.QThread):
 
     def get_test_fun_name(self):
         parts = self.filename_function.split(":")
-        filename = parts[0]
         if len(parts) > 1:
             function_name = parts[1]
         else:
@@ -122,11 +117,8 @@ class MainLoop(QtCore.QThread):
             if e.errno == errno.ENOENT:
                 raise Exception("The entry_point %s does not exist.", entry_point)
 
-    def modulechanged(self):
+    def modulechanged(self, test_filename_function):
         # Check that main module has not changed
-        test_filename_function_path = os.path.join(jarvis.get_home(), jarvis.TEST_FILENAME_FUNCTION)
-
-        test_filename_function = open(test_filename_function_path).read()
         if test_filename_function != self.filename_function:
             self.filename_function = test_filename_function
             return True
@@ -149,8 +141,8 @@ class MainLoop(QtCore.QThread):
                     modified = modified or checkreload
                     if modified:
                         break
-                except Exception, e:
-                    print traceback.format_exc(e)
+                except Exception:
+                    print traceback.format_exc()
 
         for filename in self.watchfiles:
             if filename not in fullcheckedfiles:
@@ -197,10 +189,10 @@ class MainLoop(QtCore.QThread):
 
     def singleRun(self):
         if self.display != None:
-            self.display.runcommand(self.runcommand)
+            self.runcommand()
 
 
-    def runloop(self):
+    def runloop(self, test_filename_function):
         if not self.run_finished:
             return
 
@@ -209,7 +201,7 @@ class MainLoop(QtCore.QThread):
         self.force_run = False
         modified = modified_force
 
-        module_changed = self.modulechanged()
+        module_changed = self.modulechanged(test_filename_function)
 
         if module_changed:
             # The tested module changed, so we reset the set of files to be traced
@@ -288,40 +280,25 @@ class MainLoop(QtCore.QThread):
                 new_ret[-1][1][k] = [v[0], str(v[1])]
         ret = new_ret
 
+        #        self.trace_query.inspect_all()
         self.trace_query_check_write(query_string, str(ret))
-#        self.trace_query.inspect_all()
 
-    def run_(self):
-        while(not self.finished):
-
-            try:
-                 self.runloop()
-            except:
-                self.finish_run()
-                print traceback.format_exc()
-                if self.display != None:
-                    self.display.start()
-                    self.display.errorprint(traceback.format_exc())
-                    self.display.finish()
-
-            try:
-                self.trace_query_check()
-            except:
-                print traceback.format_exc()
-
-            time.sleep(0.1)
-
-    def run(self):
-        # Write the current module name to disk
-        testmodulepath = os.path.join(jarvis.get_home(), jarvis.TEST_FILENAME_FUNCTION)
-        if self.filename_function != None:
-            f = open(testmodulepath, "w")
-            f.write(self.filename_function)
-            f.close()
-
+    def run_once(self, test_filename_function):
         try:
-            self.run_()
+            self.runloop(test_filename_function)
         except KeyboardInterrupt:
-            pass
-        except Exception, e:
-            print traceback.format_exc(e)
+            raise
+        except:
+            self.finish_run()
+            print traceback.format_exc()
+            if self.display != None:
+                self.display.start()
+                self.display.errorprint(traceback.format_exc())
+                self.display.finish()
+
+#        try:
+#            self.trace_query_check()
+#        except:
+#            print traceback.format_exc()
+
+
