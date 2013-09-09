@@ -17,6 +17,8 @@ def set_test_filename_function(test_filename_function):
     f.write(test_filename_function)
     f.close()
 
+set_test_filename_function.__test__ = False
+
 start_time = time.time()
 def delta_time_format():
     global start_time
@@ -66,6 +68,8 @@ def testunit_result(result):
         error(err[1])
     for err in result.failures:
         error(err[1])
+
+testunit_result.__test__ = False
 
 def get_osg_viewer():
     if jarvis.ml != None and jarvis.ml.display != None:
