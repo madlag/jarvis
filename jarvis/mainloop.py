@@ -227,6 +227,7 @@ class MainLoop(QtCore.QThread):
             return
 
         self.loadMainModule()
+        self.display.reset()
 
         self.start_run()
 

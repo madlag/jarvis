@@ -48,7 +48,6 @@ def debug_dir(object, filt = None):
     for k in dir(object):
         if filt == None or filt in k.lower():
             debug(k)
-
 def debug_xml(*args):
     import lxml
     debug(*(list(args[:-1]) + [lxml.etree.tostring(args[-1], pretty_print = True)]))
@@ -56,6 +55,10 @@ def debug_xml(*args):
 def debug_osg(osgdata):
     if jarvis.ml != None and jarvis.ml.display != None:
         jarvis.ml.display.osgprint(osgdata)
+
+def debug_audio(audiodata, skip = 0.0):
+    if jarvis.ml != None and jarvis.ml.display != None:
+        jarvis.ml.display.audioemit(audiodata, skip)
 
 def debug_osg_set_loop_time(loop_time):
     if jarvis.ml != None and jarvis.ml.display != None:
