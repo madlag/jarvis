@@ -25,6 +25,7 @@ from PyQt4 import QtOpenGL
 from PyQt4 import Qt, QtGui, QtCore
 import time
 import osgUtil
+import jarvis
 
 mouseButtonDictionary = {
     QtCore.Qt.LeftButton: 1,
@@ -45,6 +46,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.loopTime = 10.0
         self.mousePressed = False
         self.current_mouse_time = 0
+        self.audio = None
 
     def initializeGL (self):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
@@ -95,7 +97,6 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.resetCamera(viewer)
         return viewer
 
-
     def resetCamera(self, viewer):
 
         camera = viewer.getCamera()
@@ -126,7 +127,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         camera.setComputeNearFarMode(False)
-        
+
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
 
@@ -229,6 +230,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def resetSceneData(self, data):
         self.viewer.setSceneData(None)
+        self.audioStop()
+        self.audio = None
 
     def setSceneData(self, data):
         start = time.time()
@@ -238,6 +241,32 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             self.viewer.setSceneData(data)
         end = time.time()
         self.startTime += end - start
+
+    def audioPlay(self):
+        if self.audio != None:
+            self.audio.play()
+
+    def audioStop(self):
+        if self.audio != None:
+            self.audio.stop()
+
+    def buildAudioTmpFile(self, data, skip):
+        import wavehelper
+        if isinstance(data, basestring):
+            data = wavehelper.WaveReader(data)
+        if hasattr(data, "read"):
+            outputFileName = jarvis.get_filename("audiotmpfile.wav")
+            ws = wavehelper.WaveSink(data, outputFileName, self.loopTime, skip = skip)
+            ws.run()
+            return outputFileName
+
+    def setAudioData(self, data, skip = 0.0):
+        if self.audio != None:
+            self.audioStop()
+            self.audio = None
+        fname = self.buildAudioTmpFile(data, skip)
+        self.audio = QtGui.QSound(fname)
+        self.audioPlay()
 
     def getosgviewer(self):
         return self.viewer
@@ -251,6 +280,9 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         if t >= self.loopTime:
             self.startTime = time.time()
             t = 0.0
+            if self.audio != None:
+                self.audioStop()
+                self.audioPlay()
 
         self.viewer.frameAtTime(t)
 
@@ -264,6 +296,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.mousePressed = True
         self.set_time_from_mouse(event.x())
         self.gw.getEventQueue().mouseButtonPress(event.x(), event.y(), button)
+        self.audioStop()
 
     def mouseReleaseEvent( self, event ):
         """put the qt event in the osg event queue"""

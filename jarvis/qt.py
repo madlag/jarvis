@@ -151,6 +151,9 @@ class JarvisMain(QtGui.QWidget):
     def osgprint(self, data):
         self.osgView.setSceneData(data)
 
+    def audioemit(self, data, skip = 0.0):
+        self.osgView.setAudioData(data, skip)
+
     def setlooptime(self, loopTime):
         self.osgView.setLoopTime(loopTime)
 
