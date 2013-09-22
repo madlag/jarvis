@@ -32,11 +32,17 @@ Those ideas are also used in the `Light Table`_ KickStarter project.
 
 Installing
 ==========
-1. install qt, pyqt, osg, osgswig
-2. install pymacs an jinja2 if you want to use emacs bindings
-3. ``pip install jarvis``
-4. ``jarvis -filename_function my_python_file.py:main``
-5. Enjoy !
+1. ``pip install jarvis``
+1b. install pymacs and jinja2 if you want to use emacs bindings
+2. ``jarvis_server``
+3. open http://127.0.0.1:9017/static/index.html in your browser or run ``j_open_jarvis_window``
+4. ``jarvis_agent_pythonrunner``
+5. ``j-test-this`` on opened python file
+``from jarvis.commands import debug
+
+def main():
+    debug("Hello world"")```
+
 
 
 Full Content

@@ -37,7 +37,7 @@ def display_reset():
 
 def debug(*args):
     msg = " ".join(map(lambda x : str(x), args))
-#    client.Client().update("debug", "append", msg + "<br/>")
+    client.Client().update("debug", "append", msg + "<br/>")
 
 def debug_dir(object, filt = None):
     debug("debug_dir", object, filt)
