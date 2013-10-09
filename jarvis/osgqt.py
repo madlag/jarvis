@@ -27,6 +27,9 @@ import time
 import osgUtil
 import jarvis
 
+UPDATE_MASK=3
+VISIBLE_CULL_MASK=1
+
 mouseButtonDictionary = {
     QtCore.Qt.LeftButton: 1,
     QtCore.Qt.MidButton: 2,
@@ -56,6 +59,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 #        self.viewer.setCameraManipulator(osgGA.TrackballManipulator())
         self.viewer.addEventHandler(osgViewer.StatsHandler())
         self.viewer.addEventHandler(osgViewer.HelpHandler())
+        self.viewer.getUpdateVisitor().setTraversalMask(UPDATE_MASK)
+        
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout ()"), self.updateGL)
         self.timer.start(40)
 
@@ -126,7 +131,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-        camera.setComputeNearFarMode(False)
+
+        camera.setCullMask(VISIBLE_CULL_MASK)
 
         if not self.gw:
             raise Exception("GraphicsWindow not yet created")
@@ -236,9 +242,11 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def setSceneData(self, data):
         start = time.time()
 #        self.startTime = time.time()
+
         if data  != None:
             data = self.build_wrapping_node(data)
             self.viewer.setSceneData(data)
+
         end = time.time()
         self.startTime += end - start
 
