@@ -48,7 +48,7 @@ def debug(*args):
 def debug_dir(object, filt = None):
     debug("debug_dir", object, filt)
     for k in dir(object):
-        if filt == None or filt in k.lower():
+        if filt == None or filt.lower() in k.lower():
             debug(k)
 def debug_xml(*args):
     import lxml
