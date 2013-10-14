@@ -175,7 +175,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         CAMERA_Z_TRANSLATE = 2.4142135623730949 #1.0 / math.tan(math.radians(CAMERA_ANGLE / 2.0))
         cameraPosition = [0.0, 0.0, CAMERA_Z_TRANSLATE]
 
-        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE,float(self.width())/float(self.height()), 1.0, 10000.0)
+        camera.setProjectionMatrixAsPerspective(CAMERA_ANGLE,float(self.width())/float(self.height()), 0.1, 10000.0)
 
         eye = osg.Vec3d(cameraPosition[0], cameraPosition[1], cameraPosition[2])
         center = osg.Vec3d(0,0,0)
