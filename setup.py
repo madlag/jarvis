@@ -7,7 +7,7 @@ README = open(os.path.join(here, 'README.rst')).read()
 NEWS = open(os.path.join(here, 'NEWS.txt')).read()
 
 
-version = '0.1.4'
+version = '0.1.5'
 
 install_requires = [
     # List your project dependencies here.
