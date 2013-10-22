@@ -173,10 +173,10 @@ class MainLoop(QtCore.QThread):
             try:
                 self.last_run = time.time()
                 fun = getattr(self.module, self.get_test_fun_name())
-                self.tracer = tracer.Tracer(self.trace_file_white_list)
-                self.tracer.install()
+                # self.tracer = tracer.Tracer(self.trace_file_white_list)
+                # self.tracer.install()
                 fun()
-                self.tracer.uninstall()
+                # self.tracer.uninstall()
                 # Reset trace so it is recomputed
                 self.trace_file_date = None
             except Exception, e:
