@@ -37,6 +37,12 @@ mouseButtonDictionary = {
     QtCore.Qt.NoButton: 0,
     }
 
+viewerFactory = osgViewer.Viewer
+
+def setViewerFactory(factory):
+    global viewerFactory
+    viewerFactory = factory
+
 class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def __init__(self, parent = 0, name = '' ,flags = 0):
         """constructor """
@@ -55,11 +61,6 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
         self.gw = self.createContext()
         self.viewer = self.createViewer()
-        #init the default eventhandler
-#        self.viewer.setCameraManipulator(osgGA.TrackballManipulator())
-        self.viewer.addEventHandler(osgViewer.StatsHandler())
-        self.viewer.addEventHandler(osgViewer.HelpHandler())
-        self.viewer.getUpdateVisitor().setTraversalMask(UPDATE_MASK)
         
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout ()"), self.updateGL)
         self.timer.start(40)
@@ -98,7 +99,13 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def createViewer(self):
         """create a osgViewer.Viewer and set the viewport, camera and previously created graphical context """
-        viewer = osgViewer.Viewer()
+        global viewerFactory
+        viewer = viewerFactory()
+        #init the default eventhandler
+#        self.viewer.setCameraManipulator(osgGA.TrackballManipulator())
+        viewer.addEventHandler(osgViewer.StatsHandler())
+        viewer.addEventHandler(osgViewer.HelpHandler())
+        viewer.getUpdateVisitor().setTraversalMask(UPDATE_MASK)
         self.resetCamera(viewer)
         return viewer
 

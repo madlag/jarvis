@@ -157,6 +157,9 @@ class JarvisMain(QtGui.QWidget):
     def setlooptime(self, loopTime):
         self.osgView.setLoopTime(loopTime)
 
+    def setviewerfactory(self, factory):
+        osgqt.setViewerFactory(factory)
+
     def runcommand(self, fun):
         fun()
 
