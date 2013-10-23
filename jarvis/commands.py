@@ -3,6 +3,7 @@ import inspect
 import os
 import time
 import jarvis.client as client
+import osgqt
 
 def set_test_filename_function(test_filename_function):
     """Set the module.function that jarvis watches for changes and then executes."""
@@ -67,8 +68,7 @@ def debug_osg_set_loop_time(loop_time):
         jarvis.ml.display.setlooptime(loop_time)
 
 def debug_osg_set_viewer_factory(factory):
-    if jarvis.ml != None and jarvis.ml.display != None:
-        jarvis.ml.display.setviewerfactory(factory)
+    osgqt.setViewerFactory(factory)
 
 def testunit_result(result):
     for err in result.errors:
