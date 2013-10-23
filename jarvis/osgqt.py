@@ -237,9 +237,9 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def get_current_time(self):
         if self.mousePressed:
-            return self.current_mouse_time
+            return min(self.loopTime, max(0.0, self.current_mouse_time))
         else:
-            return time.time() - self.startTime
+            return min(self.loopTime, max(0.0, time.time() - self.startTime))
 
     def resetSceneData(self, data):
         self.viewer.setSceneData(None)
