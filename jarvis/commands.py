@@ -66,6 +66,10 @@ def debug_osg_set_loop_time(loop_time):
     if jarvis.ml != None and jarvis.ml.display != None:
         jarvis.ml.display.setlooptime(loop_time)
 
+def debug_osg_set_viewer_factory(factory):
+    if jarvis.ml != None and jarvis.ml.display != None:
+        jarvis.ml.display.setviewerfactory(factory)
+
 def testunit_result(result):
     for err in result.errors:
         error(err[1])
