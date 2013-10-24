@@ -60,7 +60,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def initializeGL (self):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
         self.gw = self.createContext()
-        self.viewer = self.createViewer()
+        self.viewer = None
         
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout ()"), self.updateGL)
         self.timer.start(40)
@@ -242,6 +242,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             return min(self.loopTime, max(0.0, time.time() - self.startTime))
 
     def resetSceneData(self, data):
+        if self.viewer == None:
+            return
         self.viewer.setSceneData(None)
         self.audioStop()
         self.audio = None
@@ -251,6 +253,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 #        self.startTime = time.time()
 
         if data  != None:
+            if self.viewer == None:
+                self.viewer = self.createViewer()
             data = self.build_wrapping_node(data)
             self.viewer.setSceneData(data)
 
@@ -287,10 +291,14 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         return self.viewer
 
     def resizeGL( self, w, h ):
+        if self.viewer == None:
+            return 
         self.gw.resized(0,0,w,h)
         self.resetCamera(self.viewer)
 
     def paintGL (self):
+        if self.viewer == None:
+            return
         t = self.get_current_time()
         if t >= self.loopTime:
             self.startTime = time.time()
