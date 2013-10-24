@@ -226,6 +226,9 @@ class MainLoop(QtCore.QThread):
             self.finish_run()
             return
 
+        if self.rollbackImporter:
+            self.rollbackImporter.cleanup(self.display)
+
         self.loadMainModule()
         self.display.reset()
 
@@ -233,8 +236,6 @@ class MainLoop(QtCore.QThread):
 
         self.display.start()
 
-        if self.rollbackImporter:
-            self.rollbackImporter.cleanup(self.display)
 
         self.singleRun()
 
