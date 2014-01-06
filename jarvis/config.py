@@ -1,0 +1,1 @@
+ASPECT_RATIO = 1.0

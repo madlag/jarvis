@@ -10,6 +10,7 @@ import osg
 import shutil
 import jarvis
 import traceback
+import config
 
 class MyTextEdit(QtGui.QTextEdit):
     def __init__(self, text, father):
@@ -103,12 +104,12 @@ class JarvisMain(QtGui.QWidget):
         self.rightBox.setSpacing(0)
         self.topBox.addLayout(self.rightBox)
 
-
-        self.error = self.createEditor("", WIDTH, 200)
-        self.debug = self.createEditor("", WIDTH, 200)
+        value = 100 if config.ASPECT_RATIO == 1.0 else 200
+        self.error = self.createEditor("", WIDTH, value)
+        self.debug = self.createEditor("", WIDTH, value)
 
         if self.osg_enable:
-            self.osgView = self.createOSG(WIDTH, int(WIDTH * 9 / 16.0))
+            self.osgView = self.createOSG(WIDTH, int(WIDTH * 1.0/config.ASPECT_RATIO))
 
         self.rightBox.addWidget(self.error, 0, Qt.AlignRight)
         self.rightBox.addWidget(self.debug, 0, Qt.AlignRight)

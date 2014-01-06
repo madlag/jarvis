@@ -26,6 +26,7 @@ from PyQt4 import Qt, QtGui, QtCore
 import time
 import osgUtil
 import jarvis
+import config
 
 UPDATE_MASK=3
 VISIBLE_CULL_MASK=1
@@ -151,7 +152,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setGraphicsContext(self.gw)
 
     def heightForWidth(self, w):
-        ret = int(w * 9.0 / 16.0)
+        ret = int(w * 1.0/config.ASPECT_RATIO)
         return ret
 
     def texture_build(self):
@@ -208,7 +209,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         stateset = osg.StateSet()
         stateset.setTextureAttributeAndModes(0, texture)
 
-        w = 16.0 / 9.0
+        w = config.ASPECT_RATIO
         h = 1.0
         corner = osg.Vec3(-w,-h, 0)
         width = osg.Vec3(2 * w,0,0)
