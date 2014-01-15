@@ -15,6 +15,10 @@ import config
 class MyTextEdit(QtGui.QTextEdit):
     def __init__(self, text, father):
         super(MyTextEdit, self).__init__(text, father)
+        self.setReadOnly(True)
+        font = QtGui.QFont()
+        font.setFamily("Monospace")
+        self.setFont(font)
 #        self.setFontPointSize(20)
 #    def keyPressEvent(self, event):
 #        print event
