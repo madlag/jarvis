@@ -89,24 +89,10 @@ class JarvisMain(QtGui.QWidget):
         HEIGHT=1024
         self.setGeometry(1680 - WIDTH, 0, WIDTH, 1050)
 
-#        self.setWindowIcon(QtGui.QIcon('web.png'))
-
-        text = ""
-#        for i in range(10):
-#            text += '<b>Text%d</b><br/>' % i
-
-        self.topBox = QtGui.QHBoxLayout(self)
-        self.topBox.setContentsMargins(0,0,0,0)
-        self.topBox.setSpacing(0)
-        self.topBox.setGeometry(QtCore.QRect(0, 0, WIDTH, HEIGHT))
-
-#        self.editor = self.createEditor(text, 300, 600)
-#        self.editor.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-#        self.topBox.addWidget(self.editor)
-
-        self.rightBox = QtGui.QVBoxLayout()
+        self.rightBox = QtGui.QVBoxLayout(self)
+        self.rightBox.setContentsMargins(0,0,0,0)
         self.rightBox.setSpacing(0)
-        self.topBox.addLayout(self.rightBox)
+        self.rightBox.setGeometry(QtCore.QRect(0, 0, WIDTH, HEIGHT))
 
         value = 100 if config.ASPECT_RATIO == 1.0 else 200
         self.error = self.createEditor("", WIDTH, value)
