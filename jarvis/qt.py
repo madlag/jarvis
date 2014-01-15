@@ -87,13 +87,10 @@ class JarvisMain(QtGui.QWidget):
             layout = {}
 
         WIDTH=480
-        HEIGHT=1024
-        self.setGeometry(1680 - WIDTH, 0, WIDTH, 1050)
 
         self.rightBox = QtGui.QVBoxLayout(self)
         self.rightBox.setContentsMargins(0,0,0,0)
         self.rightBox.setSpacing(0)
-        self.rightBox.setGeometry(QtCore.QRect(0, 0, WIDTH, HEIGHT))
 
         value = 100 if config.ASPECT_RATIO == 1.0 else 200
         self.error = self.createEditor("", WIDTH, value)
@@ -102,10 +99,10 @@ class JarvisMain(QtGui.QWidget):
         if self.osg_enable:
             self.osgView = self.createOSG(WIDTH, int(WIDTH * 1.0/config.ASPECT_RATIO))
 
-        self.rightBox.addWidget(self.error, 0, Qt.AlignRight)
-        self.rightBox.addWidget(self.debug, 0, Qt.AlignRight)
+        self.rightBox.addWidget(self.error)
+        self.rightBox.addWidget(self.debug)
         if self.osg_enable:
-            self.rightBox.addWidget(self.osgView, 0, Qt.AlignRight)
+            self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
 
 #        editor.textChanged.connect(self.display)
 #        editor.wheelEvent.connect(self.wheelEvent)
