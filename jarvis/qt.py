@@ -19,6 +19,7 @@ class MyTextEdit(QtGui.QTextEdit):
         font = QtGui.QFont()
         font.setFamily("Monospace")
         self.setFont(font)
+        self.setLineWrapMode(QtGui.QTextEdit.NoWrap)
 #        self.setFontPointSize(20)
 #    def keyPressEvent(self, event):
 #        print event
