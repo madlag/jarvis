@@ -87,6 +87,7 @@ class JarvisMain(QtGui.QWidget):
             layout = {}
 
         WIDTH=480
+        self.setGeometry(1680 - WIDTH, 0, WIDTH, 1050)
 
         self.rightBox = QtGui.QVBoxLayout(self)
         self.rightBox.setContentsMargins(0,0,0,0)
