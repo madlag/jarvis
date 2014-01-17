@@ -35,7 +35,7 @@ Installing
 1. install qt, pyqt, osg, osgswig
 2. install pymacs and jinja2 if you want to use emacs bindings
 3. ``pip install jarvis``
-4. ``jarvis -filename_function my_python_file.py:main``
+4. ``jarvis --filename_function my_python_file.py:main``
 5. Enjoy !
 
 
