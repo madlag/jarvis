@@ -68,7 +68,6 @@ def listen():
 
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument("--nogl", default=False, action="store_true", help="disable gl window")
     parser.add_argument("-f", "--filename_function", metavar="NAME")
     parser.add_argument("-l", "--layout", metavar="LAYOUT", default=None)
 
