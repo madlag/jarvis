@@ -176,7 +176,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setViewport(osg.Viewport(0,0, self.width(), self.height()))
         camera.setReferenceFrame(osg.Transform.ABSOLUTE_RF)
         camera.setRenderOrder(osg.Camera.PRE_RENDER)
-        camera.setRenderTargetImplementation(osg.Camera.FRAME_BUFFER_OBJECT)
+        camera.setRenderTargetImplementation(osg.Camera.FRAME_BUFFER)
+        # camera.setRenderTargetImplementation(osg.Camera.FRAME_BUFFER_OBJECT)
         camera.attach(osg.Camera.COLOR_BUFFER, texture, 0, 0, False, 0, 0)
 
         CAMERA_ANGLE = 45.0
@@ -200,8 +201,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         material.setAmbient(osg.Material.FRONT_AND_BACK, color)
         camera.getOrCreateStateSet().setAttributeAndModes(material)
         camera.setClearColor(osg.Vec4(0,0,0,0))
-        camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-
+        camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT | GL.GL_STENCIL_BUFFER_BIT)
 
         return camera, texture
 
