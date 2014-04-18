@@ -13,16 +13,14 @@ import traceback
 import config
 
 class MyTextEdit(QtGui.QTextEdit):
-    def __init__(self, text, father):
-        super(MyTextEdit, self).__init__(text, father)
+    def __init__(self, text_color, father):
+        super(MyTextEdit, self).__init__("", father)
         self.setReadOnly(True)
         font = QtGui.QFont()
-        font.setFamily("Monospace")
+        font.setFamily("Monaco")
         self.setFont(font)
         self.setLineWrapMode(QtGui.QTextEdit.NoWrap)
-#        self.setFontPointSize(20)
-#    def keyPressEvent(self, event):
-#        print event
+        self.setTextColor(QtGui.QColor(*text_color))
 
 class JarvisMain(QtGui.QWidget):
 
@@ -52,14 +50,8 @@ class JarvisMain(QtGui.QWidget):
     def display(self):
         print self.editor.toPlainText()
 
-#    def wheelEvent(self, event):
-#        print self.editor.setFocus(False)
-
-#    def keyPressEvent(self, event):
-#         print event
-
-    def createEditor(self, text, width, height):
-        editor = MyTextEdit(text, self)
+    def createEditor(self, text, width, height, text_color):
+        editor = MyTextEdit(text_color, self)
         editor.setMinimumWidth(width)
         editor.setMinimumHeight(height)
         return editor
@@ -86,28 +78,29 @@ class JarvisMain(QtGui.QWidget):
         else:
             layout = {}
 
-        WIDTH=480
-        self.setGeometry(1680 - WIDTH, 0, WIDTH, 1050)
+        screen = QtGui.QDesktopWidget().screenGeometry()
+        width = screen.width() * config.WIDTH_RATIO
+        self.setGeometry(
+            screen.width() - width,
+            0, width, screen.height()
+        )
 
         self.rightBox = QtGui.QVBoxLayout(self)
         self.rightBox.setContentsMargins(0,0,0,0)
         self.rightBox.setSpacing(0)
 
-        value = 100 if config.ASPECT_RATIO == 1.0 else 200
-        self.error = self.createEditor("", WIDTH, value)
-        self.debug = self.createEditor("", WIDTH, value)
+        TOPBAR_HEIGHT = 50
+        height = (screen.height() - width / config.ASPECT_RATIO) / 2.0 - TOPBAR_HEIGHT
+        self.error = self.createEditor("", width, height, (230, 20, 20))
+        self.debug = self.createEditor("", width, height, (20, 20, 20))
 
         if self.osg_enable:
-            self.osgView = self.createOSG(WIDTH, int(WIDTH * 1.0/config.ASPECT_RATIO))
+            self.osgView = self.createOSG(width, width / config.ASPECT_RATIO)
 
         self.rightBox.addWidget(self.error)
         self.rightBox.addWidget(self.debug)
         if self.osg_enable:
             self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
-
-#        editor.textChanged.connect(self.display)
-#        editor.wheelEvent.connect(self.wheelEvent)
-#        self.editor.setFocus()
         self.filename = None
         self.show()
 
