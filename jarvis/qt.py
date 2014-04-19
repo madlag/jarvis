@@ -22,6 +22,35 @@ class MyTextEdit(QtGui.QTextEdit):
         self.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.setTextColor(QtGui.QColor(*text_color))
 
+class ToolBar(QtGui.QWidget):
+    def __init__(self, father):
+        QtGui.QWidget.__init__(self)
+
+        self.father = father
+        self.aspect_ratio_btn = QtGui.QPushButton('square', self)
+        self.aspect_ratio_btn.clicked.connect(self.aspect_ratio_btn_handle)
+        self.toogle_aspect_ratio = True
+
+        self.fullscreen_btn = QtGui.QPushButton('fullscreen', self)
+        self.fullscreen_btn.clicked.connect(self.fullscreen_btn_handle)
+
+        layout = QtGui.QHBoxLayout(self)
+        layout.addWidget(self.aspect_ratio_btn)
+        layout.addWidget(self.fullscreen_btn)
+
+    def aspect_ratio_btn_handle(self):
+        if self.toogle_aspect_ratio:
+            self.father.update_aspect_ratio(1.0)
+            self.aspect_ratio_btn.setText("large")
+        else:
+            self.father.update_aspect_ratio(16.0 / 9.0)
+            self.aspect_ratio_btn.setText("square")
+
+        self.toogle_aspect_ratio = not self.toogle_aspect_ratio
+
+    def fullscreen_btn_handle(self):
+        pass
+
 class JarvisMain(QtGui.QWidget):
 
     def __init__(self, layout=None):
@@ -41,8 +70,8 @@ class JarvisMain(QtGui.QWidget):
             pass
 
     def start(self):
-        self.debug.clear()
-        self.error.clear()
+        self.debugEditor.clear()
+        self.errorEditor.clear()
 
     def finish(self):
         pass
@@ -78,6 +107,26 @@ class JarvisMain(QtGui.QWidget):
         else:
             layout = {}
 
+        self.rightBox = QtGui.QVBoxLayout(self)
+        self.rightBox.setContentsMargins(0,0,0,0)
+        self.rightBox.setSpacing(0)
+
+        self.errorEditor = MyTextEdit((230, 20, 20), self)
+        self.debugEditor = MyTextEdit((20, 20, 20),  self)
+
+        self.rightBox.addWidget(self.errorEditor)
+        self.rightBox.addWidget(self.debugEditor)
+        if self.osg_enable:
+            self.osgView = osgqt.PyQtOSGWidget(self)
+            self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
+            self.rightBox.addWidget(ToolBar(self))
+
+        self.update_aspect_ratio(config.ASPECT_RATIO)
+
+        self.filename = None
+        self.show()
+
+    def update_aspect_ratio(self, aspect_ratio):
         screen = QtGui.QDesktopWidget().screenGeometry()
         width = screen.width() * config.WIDTH_RATIO
         self.setGeometry(
@@ -85,24 +134,18 @@ class JarvisMain(QtGui.QWidget):
             0, width, screen.height()
         )
 
-        self.rightBox = QtGui.QVBoxLayout(self)
-        self.rightBox.setContentsMargins(0,0,0,0)
-        self.rightBox.setSpacing(0)
+        WINDOW_BAR = 50
+        height = (screen.height() - width / aspect_ratio) / 2.0 - WINDOW_BAR
 
-        TOPBAR_HEIGHT = 50
-        height = (screen.height() - width / config.ASPECT_RATIO) / 2.0 - TOPBAR_HEIGHT
-        self.error = self.createEditor("", width, height, (230, 20, 20))
-        self.debug = self.createEditor("", width, height, (20, 20, 20))
+        self.errorEditor.setMinimumWidth(width)
+        self.errorEditor.setMinimumHeight(height)
+
+        self.debugEditor.setMinimumWidth(width)
+        self.debugEditor.setMinimumHeight(height)
 
         if self.osg_enable:
-            self.osgView = self.createOSG(width, width / config.ASPECT_RATIO)
-
-        self.rightBox.addWidget(self.error)
-        self.rightBox.addWidget(self.debug)
-        if self.osg_enable:
-            self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
-        self.filename = None
-        self.show()
+            self.osgView.setMinimumWidth(width)
+            self.osgView.setMinimumHeight(width / aspect_ratio)
 
     def atomic_write(self, filename, text):
         f = open(filename + ".tmp", "w")
@@ -112,23 +155,23 @@ class JarvisMain(QtGui.QWidget):
 
     def debugprint(self, *args):
         text = " ".join(map(lambda x: str(x), args))
-        self.debug.append(text)
-        text = self.debug.toPlainText()
+        self.debugEditor.append(text)
+        text = self.debugEditor.toPlainText()
 
         debug_file = jarvis.get_filename(jarvis.DEBUG_FILE)
         self.atomic_write(debug_file, text + "\n")
 
     def errorprint(self, *args):
         text = " ".join(map(lambda x: str(x), args))
-        self.error.append(text)
-        text = self.error.toPlainText()
+        self.errorEditor.append(text)
+        text = self.errorEditor.toPlainText()
 
         error_file = jarvis.get_filename(jarvis.ERROR_FILE)
         self.atomic_write(error_file, text + "\n")
 
     def reset(self):
-        self.debug.setText("")
-        self.error.setText("")
+        self.debugEditor.setText("")
+        self.errorEditor.setText("")
         self.osgView.resetSceneData(None)
 
     def osgprint(self, data):
