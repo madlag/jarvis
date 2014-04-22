@@ -48,6 +48,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def __init__(self, parent = 0, name = '' ,flags = 0):
         """constructor """
         QtOpenGL.QGLWidget.__init__(self, parent)
+        self.parent = parent
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.timer = Qt.QTimer()
         self.timer.setInterval(40)
@@ -152,6 +153,10 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setGraphicsContext(self.gw)
 
     def heightForWidth(self, w):
+        if config.ASPECT_RATIO == "square":
+            return w
+        if config.ASPECT_RATIO == "large":
+            return w / (16.0 / 9.0)
         ret = int(w * 1.0/config.ASPECT_RATIO)
         return ret
 
@@ -209,7 +214,10 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         stateset = osg.StateSet()
         stateset.setTextureAttributeAndModes(0, texture)
 
-        w = config.ASPECT_RATIO
+        if config.ASPECT_RATIO == "large":
+            w = 16.0/9.0
+        elif config.ASPECT_RATIO == "square":
+            w = 1.0
         h = 1.0
         corner = osg.Vec3(-w,-h, 0)
         width = osg.Vec3(2 * w,0,0)
@@ -301,6 +309,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         if self.viewer == None:
             return
         t = self.get_current_time()
+        self.parent.toolbar.update_slider(t / self.loopTime)
         if t >= self.loopTime:
             self.startTime = time.time()
             t = 0.0
@@ -310,15 +319,15 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
         self.viewer.frameAtTime(t)
 
-    def set_time_from_mouse(self, position):
-        self.current_mouse_time = self.loopTime * float(position) / float(self.width())
+    def set_current_time(self, delta):
+        self.current_mouse_time = self.loopTime * delta
         self.startTime = time.time() - self.current_mouse_time
 
     def mousePressEvent( self, event ):
         """put the qt event in the osg event queue"""
         button = mouseButtonDictionary.get(event.button(), 0)
         self.mousePressed = True
-        self.set_time_from_mouse(event.x())
+        self.set_current_time(float(event.x()) / float(self.width()))
         self.gw.getEventQueue().mouseButtonPress(event.x(), event.y(), button)
         self.audioStop()
 
@@ -330,18 +339,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def mouseMoveEvent(self, event):
         """put the qt event in the osg event queue"""
-        self.set_time_from_mouse(event.x())
+        self.set_current_time(float(event.x()) / float(self.width()))
         self.gw.getEventQueue().mouseMotion(event.x(), event.y())
-
-    def keyPressEvent(self, event):
-        """ translate the qt event to an osg event (currently only ascii values) """
-        print "key pressed", event.text()
-        self.gw.getEventQueue().keyPress( ord(event.text().toAscii().data()) ) #
-
-    def keyReleaseEvent(self, event):
-        """ translate the qt event to an osg event (currently only ascii values) """
-        print "key released", event.text()
-        self.gw.getEventQueue().keyRelease( ord(event.text().toAscii().data()) )
 
     def timerEvent(self, timerevent):
         """periodically called (each cycle) calls updateGL (which will trigger paintGL)"""

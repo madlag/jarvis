@@ -31,25 +31,30 @@ class ToolBar(QtGui.QWidget):
         self.aspect_ratio_btn.clicked.connect(self.aspect_ratio_btn_handle)
         self.toogle_aspect_ratio = True
 
-        self.fullscreen_btn = QtGui.QPushButton('fullscreen', self)
-        self.fullscreen_btn.clicked.connect(self.fullscreen_btn_handle)
+        self.slider = QtGui.QSlider(self)
+        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.slider.valueChanged.connect(self.slider_handle)
 
         layout = QtGui.QHBoxLayout(self)
         layout.addWidget(self.aspect_ratio_btn)
-        layout.addWidget(self.fullscreen_btn)
+        layout.addWidget(self.slider)
 
     def aspect_ratio_btn_handle(self):
         if self.toogle_aspect_ratio:
-            self.father.update_aspect_ratio(1.0)
+            config.ASPECT_RATIO = "square"
+            self.father.update_aspect_ratio(config.ASPECT_RATIO)
             self.aspect_ratio_btn.setText("large")
         else:
-            self.father.update_aspect_ratio(16.0 / 9.0)
+            config.ASPECT_RATIO = "large"
+            self.father.update_aspect_ratio(config.ASPECT_RATIO)
             self.aspect_ratio_btn.setText("square")
-
         self.toogle_aspect_ratio = not self.toogle_aspect_ratio
 
-    def fullscreen_btn_handle(self):
-        pass
+    def update_slider(self, delta):
+        self.slider.setValue(int(delta * 100))
+
+    def slider_handle(self):
+        self.father.osgView.set_current_time(float(self.slider.value()) / 100.0)
 
 class JarvisMain(QtGui.QWidget):
 
@@ -79,33 +84,8 @@ class JarvisMain(QtGui.QWidget):
     def display(self):
         print self.editor.toPlainText()
 
-    def createEditor(self, text, width, height, text_color):
-        editor = MyTextEdit(text_color, self)
-        editor.setMinimumWidth(width)
-        editor.setMinimumHeight(height)
-        return editor
-
-    def createOSG(self, width, height):
-        osgWidget = osgqt.PyQtOSGWidget(self)
-        osgWidget.setMinimumWidth(width)
-        osgWidget.setMinimumHeight(height)
-        return osgWidget
-
-    def parse_layout(self, layout):
-        ret = {}
-        f = open(layout)
-        for line in f:
-            parts = line.split("=")
-            ret[parts[0]] = int(parts[1])
-        return ret
-
     def initUI(self, layout=None):
         self.setWindowTitle('Jarvis')
-
-        if layout is not None:
-            layout = self.parse_layout(layout)
-        else:
-            layout = {}
 
         self.rightBox = QtGui.QVBoxLayout(self)
         self.rightBox.setContentsMargins(0,0,0,0)
@@ -118,8 +98,9 @@ class JarvisMain(QtGui.QWidget):
         self.rightBox.addWidget(self.debugEditor)
         if self.osg_enable:
             self.osgView = osgqt.PyQtOSGWidget(self)
+            self.toolbar = ToolBar(self)
             self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
-            self.rightBox.addWidget(ToolBar(self))
+            self.rightBox.addWidget(self.toolbar)
 
         self.update_aspect_ratio(config.ASPECT_RATIO)
 
@@ -127,6 +108,12 @@ class JarvisMain(QtGui.QWidget):
         self.show()
 
     def update_aspect_ratio(self, aspect_ratio):
+        if aspect_ratio == "large":
+            ratio = 16.0/9.0
+        elif aspect_ratio == "square":
+            ratio = 1.0
+        else:
+            raise Exception("Invalid aspect ratio " + ratio)
         screen = QtGui.QDesktopWidget().screenGeometry()
         width = screen.width() * config.WIDTH_RATIO
         self.setGeometry(
@@ -135,7 +122,7 @@ class JarvisMain(QtGui.QWidget):
         )
 
         WINDOW_BAR = 50
-        height = (screen.height() - width / aspect_ratio) / 2.0 - WINDOW_BAR
+        height = (screen.height() - width / ratio) / 2.0 - WINDOW_BAR
 
         self.errorEditor.setMinimumWidth(width)
         self.errorEditor.setMinimumHeight(height)
@@ -145,7 +132,7 @@ class JarvisMain(QtGui.QWidget):
 
         if self.osg_enable:
             self.osgView.setMinimumWidth(width)
-            self.osgView.setMinimumHeight(width / aspect_ratio)
+            self.osgView.setMinimumHeight(width / ratio)
 
     def atomic_write(self, filename, text):
         f = open(filename + ".tmp", "w")
