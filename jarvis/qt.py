@@ -11,6 +11,8 @@ import shutil
 import jarvis
 import traceback
 import config
+import datetime
+import math
 
 class MyTextEdit(QtGui.QTextEdit):
     def __init__(self, text_color, father):
@@ -27,31 +29,45 @@ class ToolBar(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
 
         self.father = father
+        layout = QtGui.QHBoxLayout(self)
+
+        self.toogle_aspect_ratio = True
         self.aspect_ratio_btn = QtGui.QPushButton('square', self)
         self.aspect_ratio_btn.clicked.connect(self.aspect_ratio_btn_handle)
-        self.toogle_aspect_ratio = True
+        layout.addWidget(self.aspect_ratio_btn)
 
         self.slider = QtGui.QSlider(self)
         self.slider.setOrientation(QtCore.Qt.Horizontal)
         self.slider.valueChanged.connect(self.slider_handle)
-
-        layout = QtGui.QHBoxLayout(self)
-        layout.addWidget(self.aspect_ratio_btn)
         layout.addWidget(self.slider)
+
+        self.time_info = QtGui.QLabel(self)
+        self.time_info.setText("00:00:00/00:00:00 30FPS")
+        layout.addWidget(self.time_info)
 
     def aspect_ratio_btn_handle(self):
         if self.toogle_aspect_ratio:
-            config.ASPECT_RATIO = "square"
-            self.father.update_aspect_ratio(config.ASPECT_RATIO)
+            config.ASPECT_RATIO_HINT = "square"
+            self.father.update_aspect_ratio(config.ASPECT_RATIO_HINT)
             self.aspect_ratio_btn.setText("large")
         else:
-            config.ASPECT_RATIO = "large"
-            self.father.update_aspect_ratio(config.ASPECT_RATIO)
+            config.ASPECT_RATIO_HINT = "large"
+            self.father.update_aspect_ratio(config.ASPECT_RATIO_HINT)
             self.aspect_ratio_btn.setText("square")
         self.toogle_aspect_ratio = not self.toogle_aspect_ratio
 
-    def update_slider(self, delta):
+    def time_to_str(self, seconds):
+        m, s = divmod(seconds, 60)
+        ms = (seconds * 1000.0) % 1000
+        return "%02d:%02d.%03d" % (m, s, ms)
+
+    def update(self, current_time, duration, fps):
+        delta = current_time / duration
         self.slider.setValue(int(delta * 100))
+        txt =  self.time_to_str(current_time) + "/"
+        txt += self.time_to_str(duration) + " "
+        txt += "(" + ("%03d" % fps) + " fps)"
+        self.time_info.setText(txt)
 
     def slider_handle(self):
         self.father.osgView.set_current_time(float(self.slider.value()) / 100.0)
@@ -102,7 +118,7 @@ class JarvisMain(QtGui.QWidget):
             self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
             self.rightBox.addWidget(self.toolbar)
 
-        self.update_aspect_ratio(config.ASPECT_RATIO)
+        self.update_aspect_ratio(config.ASPECT_RATIO_HINT)
 
         self.filename = None
         self.show()
