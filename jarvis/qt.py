@@ -134,17 +134,18 @@ class JarvisMain(QtGui.QWidget):
         width = screen.width() * config.WIDTH_RATIO
         self.setGeometry(
             screen.width() - width,
-            0, width, screen.height()
+            0, width, screen.height() - config.PADDING_BOTTOM
         )
+        print config.PADDING_BOTTOM
 
         WINDOW_BAR = 50
         height = (screen.height() - width / ratio) / 2.0 - WINDOW_BAR
 
         self.errorEditor.setMinimumWidth(width)
-        self.errorEditor.setMinimumHeight(height)
+        self.errorEditor.setMinimumHeight(height - config.PADDING_BOTTOM / 2.0)
 
         self.debugEditor.setMinimumWidth(width)
-        self.debugEditor.setMinimumHeight(height)
+        self.debugEditor.setMinimumHeight(height - config.PADDING_BOTTOM / 2.0)
 
         if self.osg_enable:
             self.osgView.setMinimumWidth(width)
