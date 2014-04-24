@@ -52,12 +52,12 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.parent = parent
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.timer = Qt.QTimer()
-        self.timer.setInterval(1)
+        self.timer.setInterval(config.FRAME_INTERVAL)
         self.camera = None
         self.startTime = time.time()
         self.loopTime = 10.0
-        self.mousePressed = False
-        self.current_mouse_time = 0
+        self.is_paused = False
+        self.current_time = 0
         self.audio = None
         self.fps_calculator = FPSCalculator(smoothness=30)
 
@@ -246,12 +246,6 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         grp.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
         return grp
 
-    def get_current_time(self):
-        if self.mousePressed:
-            return min(self.loopTime, max(0.0, self.current_mouse_time))
-        else:
-            return min(self.loopTime, max(0.0, time.time() - self.startTime))
-
     def resetSceneData(self, data):
         if self.viewer == None:
             return
@@ -307,41 +301,71 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.gw.resized(0,0,w,h)
         self.resetCamera(self.viewer)
 
-    def paintGL (self):
+    def paintGL(self):
         if self.viewer == None:
             return
-        t = self.get_current_time()
-        self.parent.toolbar.update(t, self.loopTime, self.fps_calculator.get(t))
+
+        t = self.current_time
+        fps = self.fps_calculator.get(t)
+        self.parent.toolbar.update_time_info(t, self.loopTime, fps)
+
         if t >= self.loopTime:
             self.startTime = time.time()
+            self.current_time = 0.0
             t = 0.0
             if self.audio != None:
                 self.audioStop()
                 self.audioPlay()
 
         self.viewer.frameAtTime(t)
+        self.update_time()
 
-    def set_current_time(self, delta):
-        self.current_mouse_time = self.loopTime * delta
-        self.startTime = time.time() - self.current_mouse_time
+    def align_time(self, t):
+        return round(t * config.FRAME_SLIDER_STEP) / config.FRAME_SLIDER_STEP
+
+    def clamp_time(self, t):
+        return t % self.loopTime
+
+    def update_time(self, from_ratio=None, from_delta=None):
+        if from_ratio:
+            self.current_time = self.align_time(self.loopTime * from_ratio)
+        elif from_delta:
+            self.current_time += self.align_time(from_delta)
+            if self.is_paused:
+                self.paused_time += self.align_time(from_delta)
+        elif not self.is_paused:
+            self.current_time = time.time() - self.startTime
+        self.current_time = self.clamp_time(self.current_time)
+        if not self.is_paused:
+            self.startTime = time.time() - self.current_time
+
+    def pause(self):
+        self.is_paused = True
+        self.paused_time = time.time()
+        self.saved_current_time = self.current_time
+
+    def play(self):
+        self.is_paused = False
+        delta_time = time.time() - self.paused_time
+        self.startTime = time.time() - self.current_time
+        if self.current_time == self.saved_current_time:
+            self.current_time += delta_time
 
     def mousePressEvent( self, event ):
         """put the qt event in the osg event queue"""
         button = mouseButtonDictionary.get(event.button(), 0)
-        self.mousePressed = True
-        self.set_current_time(float(event.x()) / float(self.width()))
+        self.update_time(from_ratio=float(event.x()) / float(self.width()))
         self.gw.getEventQueue().mouseButtonPress(event.x(), event.y(), button)
         self.audioStop()
 
     def mouseReleaseEvent( self, event ):
         """put the qt event in the osg event queue"""
         button = mouseButtonDictionary.get(event.button(), 0)
-        self.mousePressed = False
         self.gw.getEventQueue().mouseButtonRelease(event.x(), event.y(), button)
 
     def mouseMoveEvent(self, event):
         """put the qt event in the osg event queue"""
-        self.set_current_time(float(event.x()) / float(self.width()))
+        self.update_time(from_ratio=float(event.x()) / float(self.width()))
         self.gw.getEventQueue().mouseMotion(event.x(), event.y())
 
     def getGraphicsWindow(self):

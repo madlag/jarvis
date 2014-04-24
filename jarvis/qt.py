@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -19,7 +20,9 @@ class MyTextEdit(QtGui.QTextEdit):
         super(MyTextEdit, self).__init__("", father)
         self.setReadOnly(True)
         font = QtGui.QFont()
-        font.setFamily("Monaco")
+        font.setFamily(config.FONT_FAMILY)
+        font.setPointSize(config.FONT_SIZE)
+        font.setStyleHint(QtGui.QFont.TypeWriter)
         self.setFont(font)
         self.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.setTextColor(QtGui.QColor(*text_color))
@@ -29,23 +32,63 @@ class ToolBar(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
 
         self.father = father
-        layout = QtGui.QHBoxLayout(self)
+
+        layout = QtGui.QVBoxLayout(self)
+
+        top_bar = QtGui.QHBoxLayout()
+        layout.addLayout(top_bar)
+
+        bottom_bar = QtGui.QHBoxLayout()
+        layout.addLayout(bottom_bar)
 
         self.toogle_aspect_ratio = True
         self.aspect_ratio_btn = QtGui.QPushButton('square', self)
-        self.aspect_ratio_btn.clicked.connect(self.aspect_ratio_btn_handle)
-        layout.addWidget(self.aspect_ratio_btn)
+        self.aspect_ratio_btn.clicked.connect(self.aspect_ratio_btn_clicked)
+        bottom_bar.addWidget(self.aspect_ratio_btn)
 
-        self.slider = QtGui.QSlider(self)
-        self.slider.setOrientation(QtCore.Qt.Horizontal)
-        self.slider.valueChanged.connect(self.slider_handle)
-        layout.addWidget(self.slider)
+        self.left_btn = QtGui.QPushButton(u'<', self)
+        self.left_btn.clicked.connect(self.left_btn_clicked)
+        bottom_bar.addWidget(self.left_btn)
+
+        self.toogle_play = True
+        self.play_btn = QtGui.QPushButton(u'❙ ❙', self)
+        self.play_btn.clicked.connect(self.play_btn_clicked)
+        bottom_bar.addWidget(self.play_btn)
+
+        self.right_btn = QtGui.QPushButton(u'>', self)
+        self.right_btn.clicked.connect(self.right_btn_clicked)
+        bottom_bar.addWidget(self.right_btn)
+
+        if config.HIDE_SLIDER is False:
+            self.slider = QtGui.QSlider(self)
+            self.slider_max = self.father.osgView.loopTime * config.FRAME_SLIDER_STEP
+            self.slider.setMinimum(0)
+            self.slider.setMaximum(self.slider_max)
+            self.slider.setOrientation(QtCore.Qt.Horizontal)
+            self.slider.valueChanged.connect(self.slider_value_changed)
+            top_bar.addWidget(self.slider)
 
         self.time_info = QtGui.QLabel(self)
-        self.time_info.setText("00:00:00/00:00:00 30FPS")
-        layout.addWidget(self.time_info)
+        self.time_info.setText("00:00.00/00:00.00 30FPS")
+        bottom_bar.addWidget(self.time_info)
 
-    def aspect_ratio_btn_handle(self):
+    def time_to_str(self, seconds):
+        m, s = divmod(seconds, 60)
+        ms = (seconds * 100.0) % 100
+        return "%02d:%02d.%02d" % (m, s, ms)
+
+    def update_time_info(self, current_time, duration, fps):
+        delta = current_time / duration
+        if config.HIDE_SLIDER is False:
+            self.update_slider = True
+            self.slider.setValue(int(delta * self.slider_max))
+            self.update_slider = False
+        txt =  self.time_to_str(current_time) + "/"
+        txt += self.time_to_str(duration) + " "
+        txt += "(" + ("%03d" % fps) + " fps)"
+        self.time_info.setText(txt)
+
+    def aspect_ratio_btn_clicked(self):
         if self.toogle_aspect_ratio:
             config.ASPECT_RATIO_HINT = "square"
             self.father.update_aspect_ratio(config.ASPECT_RATIO_HINT)
@@ -56,21 +99,27 @@ class ToolBar(QtGui.QWidget):
             self.aspect_ratio_btn.setText("square")
         self.toogle_aspect_ratio = not self.toogle_aspect_ratio
 
-    def time_to_str(self, seconds):
-        m, s = divmod(seconds, 60)
-        ms = (seconds * 1000.0) % 1000
-        return "%02d:%02d.%03d" % (m, s, ms)
+    def play_btn_clicked(self):
+        if self.toogle_play:
+            self.father.osgView.pause()
+            self.play_btn.setText(u"►")
+        else:
+            self.father.osgView.play()
+            self.play_btn.setText(u"❙ ❙")
+        self.toogle_play = not self.toogle_play
 
-    def update(self, current_time, duration, fps):
-        delta = current_time / duration
-        self.slider.setValue(int(delta * 100))
-        txt =  self.time_to_str(current_time) + "/"
-        txt += self.time_to_str(duration) + " "
-        txt += "(" + ("%03d" % fps) + " fps)"
-        self.time_info.setText(txt)
+    def left_btn_clicked(self):
+        delta = -(1.0 / config.FRAME_SLIDER_STEP)
+        self.father.osgView.update_time(from_delta=delta)
 
-    def slider_handle(self):
-        self.father.osgView.set_current_time(float(self.slider.value()) / 100.0)
+    def right_btn_clicked(self):
+        delta = 1.0 / config.FRAME_SLIDER_STEP
+        self.father.osgView.update_time(from_delta=delta)
+
+    def slider_value_changed(self):
+        if not self.update_slider:
+            ratio = float(self.slider.value()) / self.slider_max
+            self.father.osgView.update_time(from_ratio=ratio)
 
 class JarvisMain(QtGui.QWidget):
 
@@ -136,16 +185,9 @@ class JarvisMain(QtGui.QWidget):
             screen.width() - width,
             0, width, screen.height() - config.PADDING_BOTTOM
         )
-        print config.PADDING_BOTTOM
 
         WINDOW_BAR = 50
-        height = (screen.height() - width / ratio) / 2.0 - WINDOW_BAR
-
-        self.errorEditor.setMinimumWidth(width)
-        self.errorEditor.setMinimumHeight(height - config.PADDING_BOTTOM / 2.0)
-
-        self.debugEditor.setMinimumWidth(width)
-        self.debugEditor.setMinimumHeight(height - config.PADDING_BOTTOM / 2.0)
+        height = (screen.height() - width / ratio) / 2.0 - WINDOW_BAR - self.toolbar.height()
 
         if self.osg_enable:
             self.osgView.setMinimumWidth(width)
