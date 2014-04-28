@@ -90,12 +90,12 @@ class ToolBar(QtGui.QWidget):
 
     def aspect_ratio_btn_clicked(self):
         if self.toogle_aspect_ratio:
-            config.ASPECT_RATIO_HINT = "square"
-            self.father.update_aspect_ratio(config.ASPECT_RATIO_HINT)
+            config.ASPECT_RATIO = 1.0
+            self.father.update_aspect_ratio(config.ASPECT_RATIO)
             self.aspect_ratio_btn.setText("large")
         else:
-            config.ASPECT_RATIO_HINT = "large"
-            self.father.update_aspect_ratio(config.ASPECT_RATIO_HINT)
+            config.ASPECT_RATIO = 16.0/9.0
+            self.father.update_aspect_ratio(config.ASPECT_RATIO)
             self.aspect_ratio_btn.setText("square")
         self.toogle_aspect_ratio = not self.toogle_aspect_ratio
 
@@ -167,18 +167,12 @@ class JarvisMain(QtGui.QWidget):
             self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
             self.rightBox.addWidget(self.toolbar)
 
-        self.update_aspect_ratio(config.ASPECT_RATIO_HINT)
+        self.update_aspect_ratio(config.ASPECT_RATIO)
 
         self.filename = None
         self.show()
 
-    def update_aspect_ratio(self, aspect_ratio):
-        if aspect_ratio == "large":
-            ratio = 16.0/9.0
-        elif aspect_ratio == "square":
-            ratio = 1.0
-        else:
-            raise Exception("Invalid aspect ratio " + ratio)
+    def update_aspect_ratio(self, ratio):
         screen = QtGui.QDesktopWidget().screenGeometry()
         width = screen.width() * config.WIDTH_RATIO
         self.setGeometry(

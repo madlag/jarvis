@@ -155,12 +155,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setGraphicsContext(self.gw)
 
     def heightForWidth(self, w):
-        if config.ASPECT_RATIO_HINT == "square":
-            return w
-        if config.ASPECT_RATIO_HINT == "large":
-            return w / (16.0 / 9.0)
-        ret = int(w * 1.0/config.ASPECT_RATIO_HINT)
-        return ret
+        return w / config.ASPECT_RATIO
 
     def texture_build(self):
         texture = osg.Texture2D()
@@ -215,19 +210,11 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def quad_create(self, texture):
         stateset = osg.StateSet()
         stateset.setTextureAttributeAndModes(0, texture)
-
-        if config.ASPECT_RATIO_HINT == "large":
-            w = 16.0/9.0
-        elif config.ASPECT_RATIO_HINT == "square":
-            w = 1.0
-        h = 1.0
-        corner = osg.Vec3(-w,-h, 0)
-        width = osg.Vec3(2 * w,0,0)
-        height = osg.Vec3(0,2 * h,0)
-
+        corner = osg.Vec3(-config.ASPECT_RATIO, -1.0, 0)
+        width = osg.Vec3(2 * config.ASPECT_RATIO, 0, 0)
+        height = osg.Vec3(0, 2 * 1.0, 0)
         geom = osg.createTexturedQuadGeometry(corner, width, height, 0.0, 0.0, 1.0, 1.0)
         geom.setStateSet(stateset)
-
         geode = osg.Geode()
         geode.addDrawable(geom)
         return geode

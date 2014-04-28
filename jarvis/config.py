@@ -2,7 +2,7 @@
 # Configuration file for Jarvis window                                         #
 # ---------------------------------------------------------------------------- #
 
-# Reprensentes the percentage of the screen to display jarvis window (for
+# Reprensents the percentage of the screen to display jarvis window (for
 # instance 0.5 takes an half screen)
 
 WIDTH_RATIO=1.0/3.0
@@ -12,9 +12,9 @@ WIDTH_RATIO=1.0/3.0
 
 PADDING_BOTTOM=0.0
 
-# Set the default aspect ratio for the osg view. It can be square or large.
+# Set the default aspect ratio for the osg view. It can be 16.0/9.0 or 1.0.
 
-ASPECT_RATIO_HINT="large"
+ASPECT_RATIO=16.0/9.0
 
 # The number of frame by second. It is the step used to manually update current
 # time on video.
@@ -28,11 +28,11 @@ FRAME_INTERVAL=1.0
 # Set this variable to use a custom font for the debug logs and exceptions
 # displayed in jarvis window.
 
-FONT_FAMILY="Monospace"
+FONT_FAMILY="Monaco"
 
 # Set the size of the font.
 
-FONT_SIZE=14
+FONT_SIZE=12
 
 # Hide the slider
 
