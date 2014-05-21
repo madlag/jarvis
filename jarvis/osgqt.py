@@ -54,12 +54,13 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.timer = Qt.QTimer()
         self.timer.setInterval(config.FRAME_INTERVAL)
         self.camera = None
-        self.startTime = time.time()
+        self.startTime = 0.0
         self.loopTime = 10.0
         self.is_paused = False
+        self.still_frame = True
         self.current_time = 0
         self.audio = None
-        self.fps_calculator = FPSCalculator(smoothness=30)
+        self.fps_calculator = FPSCalculator(start_time=self.startTime, smoothness=30)
 
     def initializeGL (self):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
@@ -67,10 +68,12 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.viewer = None
         
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout ()"), self.updateGL)
-        self.timer.start(1)
+        self.timer.start()
 
     def setLoopTime(self, loopTime):
         self.loopTime = loopTime
+        fname = self.buildAudioTmpFile(self.audio_data, self.audio_skip)
+        self.audio = QtGui.QSound(fname)
 
     def embedInContext (self):
         """create a osg.GraphicsWindow for a Qt.QWidget window"""
@@ -241,17 +244,17 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.audio = None
 
     def setSceneData(self, data):
-        start = time.time()
-#        self.startTime = time.time()
-
-        if data  != None:
+        if data != None:
             if self.viewer == None:
                 self.viewer = self.createViewer()
             data = self.build_wrapping_node(data)
             self.viewer.setSceneData(data)
 
-        end = time.time()
-        self.startTime += end - start
+        # ready to render
+        self.startTime = time.time()
+        self.fps_calculator.reset(self.startTime)
+        self.still_frame = False
+        self.audioPlay()
 
     def audioPlay(self):
         if self.audio != None:
@@ -275,9 +278,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         if self.audio != None:
             self.audioStop()
             self.audio = None
-        fname = self.buildAudioTmpFile(data, skip)
-        self.audio = QtGui.QSound(fname)
-        self.audioPlay()
+        self.audio_data = data
+        self.audio_skip = skip
 
     def getosgviewer(self):
         return self.viewer
@@ -292,68 +294,61 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         if self.viewer == None:
             return
 
-        t = self.current_time
-        fps = self.fps_calculator.get(t)
-        self.parent.toolbar.update_time_info(t, self.loopTime, fps)
+        frame_time = time.time()
 
-        if t >= self.loopTime:
-            self.startTime = time.time()
-            self.current_time = 0.0
-            t = 0.0
+        if self.is_paused or self.still_frame:
+            self.startTime = frame_time - self.current_time
             if self.audio != None:
-                self.audioStop()
-                self.audioPlay()
+                self.audio.stop()
+        else:
+            self.current_time = frame_time - self.startTime
+            if self.current_time >= self.loopTime:
+                self.startTime = frame_time
+                self.current_time = 0.0
+                if self.audio != None:
+                    self.audioStop()
+                    self.audioPlay()
 
-        self.viewer.frameAtTime(t)
-        self.update_time()
+        fps = self.fps_calculator.get(frame_time)
+        self.parent.toolbar.update_time_info(self.current_time, self.loopTime, fps)
+        
+        self.viewer.frameAtTime(self.current_time)
 
     def align_time(self, t):
-        return round(t * config.FRAME_SLIDER_STEP) / config.FRAME_SLIDER_STEP
-
-    def clamp_time(self, t):
-        return t % self.loopTime
+        return min(self.loopTime, max(0.0, round(t * config.FRAME_SLIDER_STEP) / config.FRAME_SLIDER_STEP))
 
     def update_time(self, from_ratio=None, from_delta=None):
         if from_ratio:
             self.current_time = self.align_time(self.loopTime * from_ratio)
+            self.startTime = time.time() - self.current_time
+
         elif from_delta:
-            self.current_time += self.align_time(from_delta)
-            if self.is_paused:
-                self.paused_time += self.align_time(from_delta)
-        elif not self.is_paused:
-            self.current_time = time.time() - self.startTime
-        self.current_time = self.clamp_time(self.current_time)
-        if not self.is_paused:
+            self.current_time = self.align_time(self.current_time + from_delta)
             self.startTime = time.time() - self.current_time
 
     def pause(self):
         self.is_paused = True
-        self.paused_time = time.time()
-        self.saved_current_time = self.current_time
 
     def play(self):
         self.is_paused = False
-        delta_time = time.time() - self.paused_time
-        self.startTime = time.time() - self.current_time
-        if self.current_time == self.saved_current_time:
-            self.current_time += delta_time
 
     def mousePressEvent( self, event ):
         """put the qt event in the osg event queue"""
+        self.still_frame = True
         button = mouseButtonDictionary.get(event.button(), 0)
         self.update_time(from_ratio=float(event.x()) / float(self.width()))
         self.gw.getEventQueue().mouseButtonPress(event.x(), event.y(), button)
-        self.audioStop()
-
-    def mouseReleaseEvent( self, event ):
-        """put the qt event in the osg event queue"""
-        button = mouseButtonDictionary.get(event.button(), 0)
-        self.gw.getEventQueue().mouseButtonRelease(event.x(), event.y(), button)
 
     def mouseMoveEvent(self, event):
         """put the qt event in the osg event queue"""
         self.update_time(from_ratio=float(event.x()) / float(self.width()))
         self.gw.getEventQueue().mouseMotion(event.x(), event.y())
+
+    def mouseReleaseEvent( self, event ):
+        """put the qt event in the osg event queue"""
+        button = mouseButtonDictionary.get(event.button(), 0)
+        self.gw.getEventQueue().mouseButtonRelease(event.x(), event.y(), button)
+        self.still_frame = False
 
     def getGraphicsWindow(self):
         """returns the osg graphicswindow created by osgViewer """

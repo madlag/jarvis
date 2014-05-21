@@ -65,7 +65,9 @@ class ToolBar(QtGui.QWidget):
             self.slider.setMinimum(0)
             self.slider.setMaximum(self.slider_max)
             self.slider.setOrientation(QtCore.Qt.Horizontal)
-            self.slider.valueChanged.connect(self.slider_value_changed)
+            self.slider.sliderPressed.connect(self.slider_pressed)
+            self.slider.sliderReleased.connect(self.slider_released)
+            self.slider.sliderMoved.connect(self.slider_moved)
             top_bar.addWidget(self.slider)
 
         self.time_info = QtGui.QLabel(self)
@@ -78,11 +80,8 @@ class ToolBar(QtGui.QWidget):
         return "%02d:%02d.%02d" % (m, s, ms)
 
     def update_time_info(self, current_time, duration, fps):
-        delta = current_time / duration
         if config.HIDE_SLIDER is False:
-            self.update_slider = True
-            self.slider.setValue(int(delta * self.slider_max))
-            self.update_slider = False
+            self.slider.setValue(current_time / duration * self.slider_max)
         txt =  self.time_to_str(current_time) + "/"
         txt += self.time_to_str(duration) + " "
         txt += "(" + ("%03d" % fps) + " fps)"
@@ -116,10 +115,17 @@ class ToolBar(QtGui.QWidget):
         delta = 1.0 / config.FRAME_SLIDER_STEP
         self.father.osgView.update_time(from_delta=delta)
 
-    def slider_value_changed(self):
-        if not self.update_slider:
-            ratio = float(self.slider.value()) / self.slider_max
-            self.father.osgView.update_time(from_ratio=ratio)
+    def slider_pressed(self):
+        self.father.osgView.still_frame = True
+        ratio = float(self.slider.value()) / self.slider_max
+        self.father.osgView.update_time(from_ratio=ratio)
+
+    def slider_moved(self):
+        ratio = float(self.slider.value()) / self.slider_max
+        self.father.osgView.update_time(from_ratio=ratio)
+
+    def slider_released(self):
+        self.father.osgView.still_frame = False
 
 class JarvisMain(QtGui.QWidget):
 

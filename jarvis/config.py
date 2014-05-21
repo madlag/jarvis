@@ -23,7 +23,7 @@ FRAME_SLIDER_STEP=30.0
 
 # The number of milliseconds between each frame actually display on the screen.
 
-FRAME_INTERVAL=1.0
+FRAME_INTERVAL=1000.0/30.0
 
 # Set this variable to use a custom font for the debug logs and exceptions
 # displayed in jarvis window.
