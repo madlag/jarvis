@@ -72,8 +72,9 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def setLoopTime(self, loopTime):
         self.loopTime = loopTime
-        fname = self.buildAudioTmpFile(self.audio_data, self.audio_skip)
-        self.audio = QtGui.QSound(fname)
+        if hasattr(self, "audio_data"):
+            fname = self.buildAudioTmpFile(self.audio_data, self.audio_skip)
+            self.audio = QtGui.QSound(fname)
 
     def embedInContext (self):
         """create a osg.GraphicsWindow for a Qt.QWidget window"""
