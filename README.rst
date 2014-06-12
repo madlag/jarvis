@@ -33,10 +33,11 @@ Those ideas are also used in the `Light Table`_ KickStarter project.
 Installing
 ==========
 1. install qt, pyqt, osg, osgswig
-2. install pymacs and jinja2 if you want to use emacs bindings
-3. ``pip install jarvis``
-4. ``jarvis --filename_function my_python_file.py:main``
-5. Enjoy !
+2. install ffmpeg, portaudio and pyaudio
+3. install pymacs and jinja2 if you want to use emacs bindings
+4. ``pip install jarvis``
+5. ``jarvis --filename_function my_python_file.py:main``
+6. Enjoy !
 
 
 Full  Documentation
