@@ -25,6 +25,10 @@ FRAME_SLIDER_STEP=30.0
 
 FRAME_INTERVAL=1000.0/30.0
 
+# Max out of sync time between audio and video allowed 
+
+AUDIO_SYNC_TOLERANCE=1.0/60.0
+
 # Set this variable to use a custom font for the debug logs and exceptions
 # displayed in jarvis window.
 

@@ -292,7 +292,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
                 # resync
                 display_time = self.current_time - config.FRAME_INTERVAL / 1000.0
                 delta = (self.audio.get_time() - self.audio_skip) - display_time
-                if abs(delta) > config.FRAME_INTERVAL / 1000.0 :
+                if abs(delta) > config.AUDIO_SYNC_TOLERANCE :
                     self.audio.set_time(self.audio.get_time() - delta)
 
                 if not self.audio.is_playing:
