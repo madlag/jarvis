@@ -73,6 +73,7 @@ class ToolBar(QtGui.QWidget):
         self.time_info = QtGui.QLabel(self)
         self.time_info.setText("00:00.00/00:00.00 30FPS")
         bottom_bar.addWidget(self.time_info)
+        self.update_slider = True
 
     def time_to_str(self, seconds):
         m, s = divmod(seconds, 60)
@@ -80,7 +81,7 @@ class ToolBar(QtGui.QWidget):
         return "%02d:%02d.%02d" % (m, s, ms)
 
     def update_time_info(self, current_time, duration, fps):
-        if config.HIDE_SLIDER is False:
+        if (not config.HIDE_SLIDER) and self.update_slider:
             self.slider.setValue(current_time / duration * self.slider_max)
         txt =  self.time_to_str(current_time) + "/"
         txt += self.time_to_str(duration) + " "
@@ -117,15 +118,18 @@ class ToolBar(QtGui.QWidget):
 
     def slider_pressed(self):
         self.father.osgView.still_frame = True
+        self.update_slider = False
         ratio = float(self.slider.value()) / self.slider_max
         self.father.osgView.update_time(from_ratio=ratio)
 
     def slider_moved(self):
+        self.update_slider = False
         ratio = float(self.slider.value()) / self.slider_max
         self.father.osgView.update_time(from_ratio=ratio)
 
     def slider_released(self):
         self.father.osgView.still_frame = False
+        self.update_slider = True
 
 class JarvisMain(QtGui.QWidget):
 
