@@ -28,6 +28,7 @@ import osgUtil
 import jarvis
 import config
 from fpscalculator import FPSCalculator
+from soundplayer import SoundPlayer
 
 UPDATE_MASK=3
 VISIBLE_CULL_MASK=1
@@ -66,15 +67,11 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
         self.gw = self.createContext()
         self.viewer = None
-        
+
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout ()"), self.updateGL)
-        self.timer.start()
 
     def setLoopTime(self, loopTime):
         self.loopTime = loopTime
-        if hasattr(self, "audio_data"):
-            fname = self.buildAudioTmpFile(self.audio_data, self.audio_skip)
-            self.audio = QtGui.QSound(fname)
 
     def embedInContext (self):
         """create a osg.GraphicsWindow for a Qt.QWidget window"""
@@ -208,7 +205,6 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         camera.setClearColor(osg.Vec4(0,0,0,0))
         camera.setClearMask(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-
         return camera, texture
 
     def quad_create(self, texture):
@@ -222,7 +218,6 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         geode = osg.Geode()
         geode.addDrawable(geom)
         return geode
-
 
     def build_wrapping_node(self, data):
         grp = osg.Group()
@@ -238,10 +233,11 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         return grp
 
     def resetSceneData(self, data):
+        self.timer.stop()
         if self.viewer == None:
             return
         self.viewer.setSceneData(None)
-        self.audioStop()
+        self.audio.terminate()
         self.audio = None
 
     def setSceneData(self, data):
@@ -252,35 +248,26 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             self.viewer.setSceneData(data)
 
         # ready to render
-        self.startTime = time.time()
         self.fps_calculator.reset(self.startTime)
         self.still_frame = False
         self.audioPlay()
+        self.timer.start()
 
     def audioPlay(self):
-        if self.audio != None:
+        if self.audio is not None:
             self.audio.play()
 
     def audioStop(self):
-        if self.audio != None:
+        if self.audio is not None:
             self.audio.stop()
 
-    def buildAudioTmpFile(self, data, skip):
-        import wavehelper
-        if isinstance(data, basestring):
-            data = wavehelper.WaveReader(data)
-        if hasattr(data, "read"):
-            outputFileName = jarvis.get_filename("audiotmpfile.wav")
-            ws = wavehelper.WaveSink(data, outputFileName, self.loopTime, skip = skip)
-            ws.run()
-            return outputFileName
-
-    def setAudioData(self, data, skip = 0.0):
-        if self.audio != None:
-            self.audioStop()
+    def setAudioData(self, data, skip=0.0):
+        if self.audio is not None:
+            self.audio.terminate()
             self.audio = None
         self.audio_data = data
-        self.audio_skip = skip
+        self.audio_skip = float(skip)
+        self.audio = SoundPlayer(data, jarvis.get_filename("audiotmpfile.wav"), start_time=self.audio_skip + self.current_time, chunk_size=512, blocking=False)
 
     def getosgviewer(self):
         return self.viewer
@@ -299,16 +286,24 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
         if self.is_paused or self.still_frame:
             self.startTime = frame_time - self.current_time
-            if self.audio != None:
-                self.audio.stop()
+            self.audioStop()
         else:
+            if self.audio is not None :
+                # resync
+                display_time = self.current_time - config.FRAME_INTERVAL / 1000.0
+                delta = (self.audio.get_time() - self.audio_skip) - display_time
+                if abs(delta) > config.FRAME_INTERVAL / 1000.0 :
+                    self.audio.set_time(self.audio.get_time() - delta)
+
+                if not self.audio.is_playing:
+                    self.audioPlay()
+            
             self.current_time = frame_time - self.startTime
             if self.current_time >= self.loopTime:
                 self.startTime = frame_time
                 self.current_time = 0.0
-                if self.audio != None:
-                    self.audioStop()
-                    self.audioPlay()
+                if self.audio is not None:
+                    self.audio.set_time(self.audio_skip)
 
         fps = self.fps_calculator.get(frame_time)
         self.parent.toolbar.update_time_info(self.current_time, self.loopTime, fps)
@@ -326,6 +321,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         elif from_delta:
             self.current_time = self.align_time(self.current_time + from_delta)
             self.startTime = time.time() - self.current_time
+        if self.audio is not None:
+            self.audio.set_time(self.current_time + self.audio_skip)
 
     def pause(self):
         self.is_paused = True
