@@ -5,7 +5,7 @@ import time
 import os
 # also require PortAudio and ffmpeg
 
-MAX_TMP_WAVEFILE = 0
+MAX_TMP_WAVEFILE = 5
 TMP_WAV_EXTENSION = "_tmp.wav"
 
 class SoundPlayer(object):
