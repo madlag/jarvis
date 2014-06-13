@@ -257,7 +257,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def audioPlay(self):
         if self.audio is not None:
-            self.audio.play()
+            self.audio.play(blocking=False)
 
     def audioStop(self):
         if self.audio is not None:

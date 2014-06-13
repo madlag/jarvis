@@ -10,7 +10,7 @@ TMP_WAV_EXTENSION = "_tmp.wav"
 
 class SoundPlayer(object):
 
-    def __init__(self, input_file_name, tmp_dir, start_time=0.0, end_time=None, start=True, blocking=False, chunk_size=1024):
+    def __init__(self, input_file_name, tmp_dir, start_time=0.0, end_time=None, start=False, blocking=True, chunk_size=1024):
         self.chunk_size = chunk_size
         self.is_playing = False
         self.tmp_dir = tmp_dir
@@ -113,7 +113,7 @@ class SoundPlayer(object):
             data = empty_sample * self.chunk_size
         return (data, pyaudio.paContinue)
 
-    def play(self, start_time=None, end_time=None, blocking=False):
+    def play(self, start_time=None, end_time=None, blocking=True):
         if end_time is not None:
             self.set_end_time(end_time)
 
