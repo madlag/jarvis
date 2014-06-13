@@ -237,8 +237,10 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         if self.viewer == None:
             return
         self.viewer.setSceneData(None)
-        self.audio.terminate()
-        self.audio = None
+        
+        if self.audio is not None:
+            self.audio.terminate()
+            self.audio = None
 
     def setSceneData(self, data):
         if data != None:
