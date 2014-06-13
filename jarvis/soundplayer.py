@@ -2,18 +2,30 @@ import subprocess
 import pyaudio
 import wave
 import time
+import os
 # also require PortAudio and ffmpeg
+
+MAX_TMP_WAVEFILE = 5
+TMP_WAV_EXTENSION = "_tmp.wav"
 
 class SoundPlayer(object):
 
-    def __init__(self, input_file_name, tmp_file, start_time=0.0, end_time=None, start=True, blocking=False, chunk_size=1024):
+    def __init__(self, input_file_name, tmp_dir, start_time=0.0, end_time=None, start=True, blocking=False, chunk_size=1024):
         self.chunk_size = chunk_size
         self.is_playing = False
 
         if input_file_name.endswith(".wav"):
             self.wavefile = wave.open(input_file_name, 'rb')
         else:
-            wavefile_name = self._convert_file_to_wavfile(input_file_name, tmp_file, overwrite=True)
+            name = os.path.basename(input_file_name)
+            name, ext = os.path.splitext(name)
+            tmp_file_name = os.path.join(tmp_dir, name + TMP_WAV_EXTENSION)
+
+            if os.path.exists(tmp_file_name):
+                wavefile_name = tmp_file_name
+            else:
+                self._check_tmp_dir(tmp_dir)
+                wavefile_name = self._convert_file_to_wavfile(input_file_name, tmp_file_name, overwrite=True)
             self.wavefile = wave.open(wavefile_name, 'rb')
         
         self.pyaudio = pyaudio.PyAudio()
@@ -30,6 +42,18 @@ class SoundPlayer(object):
         self.stream.start_stream()
         if start:
             self.play(blocking=blocking)
+
+    def _check_tmp_dir(self, tmp_dir):
+        files = os.listdir(tmp_dir)
+        files = filter(lambda x: x.endswith(TMP_WAV_EXTENSION), files)
+        files = map(lambda name: os.path.join(tmp_dir, name), files)
+        dates = map(os.path.getatime, files)
+        files_dates = zip(files, dates)
+        files_dates = sorted(files_dates, key=lambda x: x[1], reverse=True)
+
+        while len(files_dates) > MAX_TMP_WAVEFILE:
+            file, date = files_dates.pop()
+            os.remove(file)
 
     def terminate(self):
         self.stream.stop_stream()

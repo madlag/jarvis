@@ -267,7 +267,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             self.audio = None
         self.audio_data = data
         self.audio_skip = float(skip)
-        self.audio = SoundPlayer(data, jarvis.get_filename("audiotmpfile.wav"), start_time=self.audio_skip + self.current_time, chunk_size=512, blocking=False)
+        self.audio = SoundPlayer(input_file_name=data, tmp_dir=jarvis.get_home(), start_time=self.audio_skip + self.current_time, chunk_size=512, blocking=False)
 
     def getosgviewer(self):
         return self.viewer
