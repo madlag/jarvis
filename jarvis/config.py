@@ -1,43 +1,41 @@
-# ---------------------------------------------------------------------------- #
-# Configuration file for Jarvis window                                         #
-# ---------------------------------------------------------------------------- #
+from ConfigParser import ConfigParser
+from os import path
+from atexit import register
 
-# Reprensents the percentage of the screen to display jarvis window (for
-# instance 0.5 takes an half screen)
+DEFAULT_CONFIG = """
+[graphics]
+aspect_ratio = 16./9.
+width_ratio = 0.4
+padding_bottom = 0
+font_family = 'Monaco'
+font_size = 12
+hide_slider = False
 
-WIDTH_RATIO=1.0/3.0
+[timing]
+frame_slider_step = 30.0
+frame_interval = 33.33
+audio_sync_tolerance = 1.0/60.0
+"""
 
-# By default the window takes all the height of the screen. But, if you want to
-# add a little padding you can set the padding value here (in pixel)
+# Copy default config if no config yet
+config_path = path.expanduser('~/.jarvisconfig')
+if not path.exists(config_path):
+    with open(config_path, 'wb') as f:
+        f.write(DEFAULT_CONFIG)
 
-PADDING_BOTTOM=0.0
+# Load config
+cfg = ConfigParser()
+cfg.readfp(open(config_path))
+for section in cfg.sections():
+    for name, value in cfg.items(section):
+        globals()[name.upper()] = eval(value)
 
-# Set the default aspect ratio for the osg view. It can be 16.0/9.0 or 1.0.
-
-ASPECT_RATIO=16.0/9.0
-
-# The number of frame by second. It is the step used to manually update current
-# time on video.
-
-FRAME_SLIDER_STEP=30.0
-
-# The number of milliseconds between each frame actually display on the screen.
-
-FRAME_INTERVAL=1000.0/30.0
-
-# Max out of sync time between audio and video allowed 
-
-AUDIO_SYNC_TOLERANCE=1.0/60.0
-
-# Set this variable to use a custom font for the debug logs and exceptions
-# displayed in jarvis window.
-
-FONT_FAMILY="Monaco"
-
-# Set the size of the font.
-
-FONT_SIZE=12
-
-# Hide the slider
-
-HIDE_SLIDER=False
+# Save config
+def save_config():
+    for section in cfg.sections():
+        for name, value in cfg.items(section):
+            value = globals()[name.upper()]
+            cfg.set(section, name, '"%s"' % value if isinstance(value, str) else str(value))
+    with open(config_path, 'wb') as f:
+        cfg.write(f)
+register(save_config)
