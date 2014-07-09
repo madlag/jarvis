@@ -24,7 +24,7 @@ class QTDisplay(QtCore.QObject):
         QtCore.QObject.__init__(self)
         # Create the application
         self.app = QtGui.QApplication(sys.argv)
-        
+
         # Setup OpenGL to use multisampling for antialiasing
         glf = QtOpenGL.QGLFormat.defaultFormat()
         glf.setSampleBuffers(True)

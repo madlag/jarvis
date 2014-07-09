@@ -14,6 +14,7 @@ CONFIG_TEMPLATE = """
 # font_size = 12 # the size of this font
 # hide_slider = False # whether add the slider in the UI
 # wrap_text = False # whether wrap debug and error text
+# device_pixel_ratio = 1.0 # set this variable to 2.0 for retina displays
 # frame_slider_step = 30.0 # the number of frames between each slider step.
 # frame_interval = 33.33 # the time interval between 2 steps (in seconds)
 # audio_sync_tolerance = 1.0/60.0
@@ -30,6 +31,7 @@ default_config = {
     'frame_slider_step': 30.0,
     'frame_interval': 33.33,
     'audio_sync_tolerance': 1.0/60.0,
+    'device_pixel_ratio': 1.0,
 }
 
 # Copy default config if no config yet

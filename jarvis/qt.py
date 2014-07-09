@@ -185,15 +185,13 @@ class JarvisMain(QtGui.QWidget):
 
     def update_aspect_ratio(self, ratio):
         screen = QtGui.QDesktopWidget().screenGeometry()
-        width = screen.width() * config.WIDTH_RATIO
+        screen_width = screen.width() * config.DEVICE_PIXEL_RATIO
+        screen_height = screen.height() * config.DEVICE_PIXEL_RATIO
+        width = screen_width * config.WIDTH_RATIO
         self.setGeometry(
-            screen.width() - width,
-            0, width, screen.height() - config.PADDING_BOTTOM
+            screen_width - width,
+            0, width, screen_height - config.PADDING_BOTTOM
         )
-
-        WINDOW_BAR = 50
-        height = (screen.height() - width / ratio) / 2.0 - WINDOW_BAR - self.toolbar.height()
-
         if self.osg_enable:
             self.osgView.setMinimumWidth(width)
             self.osgView.setMinimumHeight(width / ratio)
