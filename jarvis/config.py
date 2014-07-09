@@ -4,7 +4,18 @@ from atexit import register
 
 CONFIG_TEMPLATE = """
 [jarvis]
-# Add your custom config values here...
+# To customize your jarvis configuration, uncomment one of the following
+# settings and add your custom value.
+#
+# aspect_ratio = 16./9. # the aspect ratio of the osg view
+# width_ratio = 0.4 # the width ratio of jarvis on the screen
+# padding_bottom = 0 # an optional padding at the bottom
+# font_family = 'Monaco' # the font to use for debug and errors
+# font_size = 12 # the size of this font
+# hide_slider = False # whether add the slider in the UI
+# frame_slider_step = 30.0 # the number of frames between each slider step.
+# frame_interval = 33.33 # the time interval between 2 steps (in seconds)
+# audio_sync_tolerance = 1.0/60.0
 """
 
 default_config = {
