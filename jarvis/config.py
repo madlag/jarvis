@@ -13,6 +13,7 @@ CONFIG_TEMPLATE = """
 # font_family = 'Monaco' # the font to use for debug and errors
 # font_size = 12 # the size of this font
 # hide_slider = False # whether add the slider in the UI
+# wrap_text = False # whether wrap debug and error text
 # frame_slider_step = 30.0 # the number of frames between each slider step.
 # frame_interval = 33.33 # the time interval between 2 steps (in seconds)
 # audio_sync_tolerance = 1.0/60.0
@@ -25,6 +26,7 @@ default_config = {
     'font_family': 'Monaco',
     'font_size': 12,
     'hide_slider': False,
+    'wrap_text': False,
     'frame_slider_step': 30.0,
     'frame_interval': 33.33,
     'audio_sync_tolerance': 1.0/60.0,

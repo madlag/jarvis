@@ -24,7 +24,8 @@ class MyTextEdit(QtGui.QTextEdit):
         font.setPointSize(config.FONT_SIZE)
         font.setStyleHint(QtGui.QFont.TypeWriter)
         self.setFont(font)
-        self.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        if config.WRAP_TEXT is False:
+            self.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.setTextColor(QtGui.QColor(*text_color))
 
 class ToolBar(QtGui.QWidget):
