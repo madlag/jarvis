@@ -42,8 +42,8 @@ class ToolBar(QtGui.QWidget):
         bottom_bar = QtGui.QHBoxLayout()
         layout.addLayout(bottom_bar)
 
-        self.toogle_aspect_ratio = True
-        self.aspect_ratio_btn = QtGui.QPushButton('square', self)
+        self.toogle_aspect_ratio = config.ASPECT_RATIO != 1.0
+        self.aspect_ratio_btn = QtGui.QPushButton('square' if config.ASPECT_RATIO != 1.0 else 'large', self)
         self.aspect_ratio_btn.clicked.connect(self.aspect_ratio_btn_clicked)
         bottom_bar.addWidget(self.aspect_ratio_btn)
 
