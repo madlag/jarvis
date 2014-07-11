@@ -34,29 +34,34 @@ default_config = {
     'device_pixel_ratio': 1.0,
 }
 
-# Copy default config if no config yet
-config_path = path.expanduser('~/.jarvisconfig')
-if not path.exists(config_path):
-    with open(config_path, 'wb') as f:
-        f.write(CONFIG_TEMPLATE)
+try:
 
-# Load defaults
-for name, value in default_config.items():
-    globals()[name.upper()] = value
+    # Copy default config if no config yet
+    config_path = path.expanduser('~/.jarvisconfig')
+    if not path.exists(config_path):
+        with open(config_path, 'wb') as f:
+            f.write(CONFIG_TEMPLATE)
 
-# Update with config
-cfg = ConfigParser()
-cfg.readfp(open(config_path))
-for name, value in cfg.items('jarvis'):
-    globals()[name.upper()] = eval(value)
+    # Load defaults
+    for name, value in default_config.items():
+        globals()[name.upper()] = value
 
-# Save config
-def save_config():
-    for name, _ in default_config.items():
-        old = cfg.get('jarvis', name) if cfg.has_option('jarvis', name) else default_config[name]
-        new = globals()[name.upper()]
-        if old != new:
-            cfg.set('jarvis', name, '"%s"' % new if isinstance(new, str) else str(new))
-    with open(config_path, 'wb') as f:
-        cfg.write(f)
-register(save_config)
+    # Update with config
+    cfg = ConfigParser()
+    cfg.readfp(open(config_path))
+    for name, value in cfg.items('jarvis'):
+        globals()[name.upper()] = eval(value)
+
+    # Save config
+    def save_config():
+        for name, _ in default_config.items():
+            old = cfg.get('jarvis', name) if cfg.has_option('jarvis', name) else default_config[name]
+            new = globals()[name.upper()]
+            if old != new:
+                cfg.set('jarvis', name, '"%s"' % new if isinstance(new, str) else str(new))
+        with open(config_path, 'wb') as f:
+            cfg.write(f)
+    register(save_config)
+
+except:
+    raise RuntimeError("The config file ~/.jarvisconfig is invalid, please remove it or replace it by a valid one.")
