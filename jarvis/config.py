@@ -15,9 +15,8 @@ CONFIG_TEMPLATE = """
 # hide_slider = False # whether add the slider in the UI
 # wrap_text = False # whether wrap debug and error text
 # device_pixel_ratio = 1.0 # set this variable to 2.0 for retina displays
-# frame_slider_step = 30.0 # the number of frames between each slider step.
-# frame_interval = 33.33 # the time interval between 2 steps (in seconds)
-# audio_sync_tolerance = 1.0/60.0
+# fps_ui = 30.0 # FPS of the User Interface (slider, buttons)
+# fps_rendering = 30.0 # FPS of the OSG rendering (useless above 60 FPS, limited by graphic hardware)
 """
 
 default_config = {
@@ -28,9 +27,8 @@ default_config = {
     'font_size': 12,
     'hide_slider': False,
     'wrap_text': False,
-    'frame_slider_step': 30.0,
-    'frame_interval': 33.33,
-    'audio_sync_tolerance': 1.0/60.0,
+    'fps_ui': 30.0,
+    'fps_rendering': 30.0,
     'device_pixel_ratio': 1.0,
 }
 

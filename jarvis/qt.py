@@ -62,7 +62,7 @@ class ToolBar(QtGui.QWidget):
 
         if config.HIDE_SLIDER is False:
             self.slider = QtGui.QSlider(self)
-            self.slider_max = self.father.osgView.loopTime * config.FRAME_SLIDER_STEP
+            self.slider_max = self.father.osgView.loopTime * config.FPS_UI
             self.slider.setMinimum(0)
             self.slider.setMaximum(self.slider_max)
             self.slider.setOrientation(QtCore.Qt.Horizontal)
@@ -110,11 +110,11 @@ class ToolBar(QtGui.QWidget):
         self.toogle_play = not self.toogle_play
 
     def left_btn_clicked(self):
-        delta = -(1.0 / config.FRAME_SLIDER_STEP)
+        delta = -(1.0 / config.FPS_UI)
         self.father.osgView.update_time(from_delta=delta)
 
     def right_btn_clicked(self):
-        delta = 1.0 / config.FRAME_SLIDER_STEP
+        delta = 1.0 / config.FPS_UI
         self.father.osgView.update_time(from_delta=delta)
 
     def slider_pressed(self):
@@ -129,6 +129,10 @@ class ToolBar(QtGui.QWidget):
         self.father.osgView.update_time(from_ratio=ratio)
 
     def slider_released(self):
+        self.update_slider = False
+        ratio = float(self.slider.value()) / self.slider_max
+        self.father.osgView.update_time(from_ratio=ratio)
+
         self.father.osgView.still_frame = False
         self.update_slider = True
 
