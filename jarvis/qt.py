@@ -27,6 +27,11 @@ class MyTextEdit(QtGui.QTextEdit):
         if config.WRAP_TEXT is False:
             self.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.setTextColor(QtGui.QColor(*text_color))
+        self.father = father
+
+    def keyPressEvent(self, event):
+        self.father.keyPressEvent(event)
+        super(MyTextEdit, self).keyPressEvent(event)
 
 class ToolBar(QtGui.QWidget):
     def __init__(self, father):
@@ -173,7 +178,7 @@ class JarvisMain(QtGui.QWidget):
 
         self.errorEditor = MyTextEdit((230, 20, 20), self)
         self.debugEditor = MyTextEdit((20, 20, 20),  self)
-
+        
         self.rightBox.addWidget(self.errorEditor)
         self.rightBox.addWidget(self.debugEditor)
         if self.osg_enable:
@@ -186,6 +191,15 @@ class JarvisMain(QtGui.QWidget):
 
         self.filename = None
         self.show()
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        if key == QtCore.Qt.Key_Space : 
+            self.toolbar.play_btn_clicked()
+        elif key == QtCore.Qt.Key_Left:
+            self.toolbar.left_btn_clicked()
+        elif key == QtCore.Qt.Key_Right:
+            self.toolbar.right_btn_clicked()
 
     def update_aspect_ratio(self, ratio):
         screen = QtGui.QDesktopWidget().screenGeometry()
