@@ -46,7 +46,8 @@ try:
 
     # Update with config
     cfg = ConfigParser()
-    cfg.readfp(open(config_path))
+    with open(config_path) as f:
+        cfg.readfp(f)
     for name, value in cfg.items('jarvis'):
         globals()[name.upper()] = eval(value)
 
