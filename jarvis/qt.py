@@ -5,6 +5,7 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import Qt
 import os.path
 import codecs
+from artwork import config as xconfig
 import osgqt
 import osgDB
 import osg
@@ -97,10 +98,12 @@ class ToolBar(QtGui.QWidget):
     def aspect_ratio_btn_clicked(self):
         if self.toogle_aspect_ratio:
             config.ASPECT_RATIO = 1.0
+            xconfig.ASPECT_RATIO = 1.0
             self.father.update_aspect_ratio(config.ASPECT_RATIO)
             self.aspect_ratio_btn.setText("large")
         else:
             config.ASPECT_RATIO = 16.0/9.0
+            xconfig.ASPECT_RATIO = 16.0/9.0
             self.father.update_aspect_ratio(config.ASPECT_RATIO)
             self.aspect_ratio_btn.setText("square")
         self.toogle_aspect_ratio = not self.toogle_aspect_ratio
@@ -108,7 +111,7 @@ class ToolBar(QtGui.QWidget):
     def play_btn_clicked(self):
         if self.toogle_play:
             self.father.osgView.pause()
-            self.play_btn.setText(u"►")
+            self.play_btn.setText(u"\u25B6")
         else:
             self.father.osgView.play()
             self.play_btn.setText(u"❙ ❙")
@@ -140,6 +143,7 @@ class ToolBar(QtGui.QWidget):
 
         self.father.osgView.still_frame = False
         self.update_slider = True
+
 
 class JarvisMain(QtGui.QWidget):
 
@@ -173,12 +177,12 @@ class JarvisMain(QtGui.QWidget):
         self.setWindowTitle('Jarvis')
 
         self.rightBox = QtGui.QVBoxLayout(self)
-        self.rightBox.setContentsMargins(0,0,0,0)
+        self.rightBox.setContentsMargins(0, 0, 0, 0)
         self.rightBox.setSpacing(0)
 
         self.errorEditor = MyTextEdit((230, 20, 20), self)
         self.debugEditor = MyTextEdit((20, 20, 20),  self)
-        
+
         self.rightBox.addWidget(self.errorEditor)
         self.rightBox.addWidget(self.debugEditor)
         if self.osg_enable:
@@ -194,7 +198,7 @@ class JarvisMain(QtGui.QWidget):
 
     def keyPressEvent(self, event):
         key = event.key()
-        if key == QtCore.Qt.Key_Space : 
+        if key == QtCore.Qt.Key_Space:
             self.toolbar.play_btn_clicked()
         elif key == QtCore.Qt.Key_Left:
             self.toolbar.left_btn_clicked()
@@ -210,6 +214,7 @@ class JarvisMain(QtGui.QWidget):
             screen_width - width,
             0, width, screen_height - config.PADDING_BOTTOM
         )
+        xconfig.ASPECT_RATIO = ratio
         if self.osg_enable:
             self.osgView.setMinimumWidth(width)
             self.osgView.setMinimumHeight(width / ratio)
@@ -264,6 +269,6 @@ class JarvisMain(QtGui.QWidget):
             self.editor.setText(text)
             self.filename = filename
 
-            s = codecs.open(self.filename,'w','utf-8')
+            s = codecs.open(self.filename, 'w','utf-8')
             s.write(unicode(self.ui.editor_window.toPlainText()))
             s.close()
