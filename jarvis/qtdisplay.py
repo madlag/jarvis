@@ -1,8 +1,8 @@
 import sys
 import qt
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4 import QtOpenGL
+from PySide import QtGui
+from PySide import QtCore
+from PySide import QtOpenGL
 
 # Used to wrap calls to QTDisplay missing functions, to proxy it to the JarvisMain Qt Widget
 class CallWrapper:
@@ -17,7 +17,7 @@ class QTDisplay(QtCore.QObject):
     """This class act as a proxy between the rest of the world and the actual qt widgets"""
 
     # Message signal handler : it's used to pass all messages to Qt widgets
-    message_available = QtCore.pyqtSignal(object)
+    message_available = QtCore.Signal(object)
         
     def __init__(self, mainloop, layout=None):
         # Initialize this as as Qt object

@@ -15,14 +15,11 @@ import sys,os
 
 import OpenGL.GL as GL
 
-# import qtWidgets stuff
-import PyQt4
-
 # import OpenSceneGraph wrapper
 import osg, osgDB, osgGA, osgViewer
 
-from PyQt4 import QtOpenGL
-from PyQt4 import Qt, QtGui, QtCore
+from PySide import QtOpenGL
+from PySide import QtCore
 import time
 import osgUtil
 import jarvis
@@ -52,7 +49,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         QtOpenGL.QGLWidget.__init__(self, parent)
         self.parent = parent
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
-        self.timer = Qt.QTimer()
+        self.timer = QtCore.QTimer()
         self.timer.setInterval(1000.0 / config.FPS_RENDERING) # in milliseconds
         self.camera = None
         self.startTime = 0.0

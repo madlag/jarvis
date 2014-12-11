@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4.QtCore import Qt
+from PySide import QtGui
+from PySide import QtCore
+from PySide.QtCore import Qt
 import os.path
 import codecs
 import osgqt

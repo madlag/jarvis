@@ -3,7 +3,7 @@ import os.path
 import sys
 import time
 import traceback
-from PyQt4 import QtCore
+from PySide import QtCore
 import jarvis
 import rollbackimporter
 import imp
