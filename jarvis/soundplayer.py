@@ -50,22 +50,26 @@ class BufferSegment(object):
 class SoundPlayer(object):
     """ Sound player based on PyAudio to achieve a good sync"""
 
-    def __init__(self, input_file_name, tmp_dir, frames_per_buffer=1024, start_time=0.0, end_time=None, loop_nb=1, start=False, blocking=True):
+    def __init__(self, input_data, tmp_dir, frames_per_buffer=1024, start_time=0.0, end_time=None, loop_nb=1, start=False, blocking=True):
         self.tmp_dir = tmp_dir
         self.frames_per_buffer = frames_per_buffer
 
-        if input_file_name.endswith(".wav"):
-            self.wavefile = wave.open(input_file_name, 'rb')
-        else:
-            name = os.path.basename(input_file_name)
+        if isinstance(input_data, wave.Wave_read):
+            self.wavefile = input_data
+        elif isinstance(input_data, str) and input_data.endswith(".wav"):
+            self.wavefile = wave.open(input_data, 'rb')
+        elif isinstance(input_data, str):
+            name = os.path.basename(input_data)
             name, ext = os.path.splitext(name)
             tmp_file_name = os.path.join(self.tmp_dir, name + TMP_WAV_EXTENSION)
 
             if os.path.exists(tmp_file_name):
                 wavefile_name = tmp_file_name
             else:
-                wavefile_name = self._convert_file_to_wavfile(input_file_name, tmp_file_name, overwrite=True)
+                wavefile_name = self._convert_file_to_wavfile(input_data, tmp_file_name, overwrite=True)
             self.wavefile = wave.open(wavefile_name, 'rb')
+        else:
+            raise Exception("Unsupported input_data")
         
         # PyAudio init
         self.pyaudio = pyaudio.PyAudio()

@@ -25,7 +25,14 @@ import osgUtil
 import jarvis
 import config
 from fpscalculator import FPSCalculator
-from soundplayer import SoundPlayer
+try:
+    from soundplayer import SoundPlayer
+except ImportError:
+    def SoundPlayer(*args, **kwargs):
+        print "WARNING : Audio support requires PyAudio"
+        return None
+except:
+    raise
 
 UPDATE_MASK=3
 VISIBLE_CULL_MASK=1
@@ -259,9 +266,10 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             self.audio = None
         self.audio_data = data
         self.audio_skip = float(skip)
-        self.audio = SoundPlayer(input_file_name=data, tmp_dir=jarvis.get_home(), start=False, loop_nb=0, frames_per_buffer=1024, blocking=False)
-        self.audio.set_loop_time(start_time=self.audio_skip, end_time=self.audio_skip + self.loopTime)        
-        self.audio.set_time(self.audio_skip + self.current_time, compensate_buffer=False)
+        self.audio = SoundPlayer(input_data=data, tmp_dir=jarvis.get_home(), start=False, loop_nb=0, frames_per_buffer=1024, blocking=False)
+        if self.audio is not None:
+            self.audio.set_loop_time(start_time=self.audio_skip, end_time=self.audio_skip + self.loopTime)        
+            self.audio.set_time(self.audio_skip + self.current_time, compensate_buffer=False)
 
     def getosgviewer(self):
         return self.viewer
