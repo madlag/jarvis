@@ -236,6 +236,9 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         grp.addChild(quad)
 
         grp.getOrCreateStateSet().setMode(GL.GL_LIGHTING, False)
+        # ALPHA_TEST should be disabled by default by OpenGL but it's not.
+        # That's why it is required to explicitly disable it.
+        grp.getOrCreateStateSet().setMode(GL.GL_ALPHA_TEST, osg.StateAttribute.OFF)
         return grp
 
     def resetSceneData(self, data):
