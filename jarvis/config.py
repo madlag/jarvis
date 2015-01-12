@@ -7,20 +7,24 @@ CONFIG_TEMPLATE = """
 # To customize your jarvis configuration, uncomment one of the following
 # settings and add your custom value.
 #
-# aspect_ratio = 16./9. # the aspect ratio of the osg view
-# width_ratio = 0.4 # the width ratio of jarvis on the screen
-# padding_bottom = 0 # an optional padding at the bottom
-# font_family = 'Monaco' # the font to use for debug and errors
-# font_size = 12 # the size of this font
-# hide_slider = False # whether add the slider in the UI
-# wrap_text = False # whether wrap debug and error text
-# device_pixel_ratio = 1.0 # set this variable to 2.0 for retina displays
-# fps_ui = 30.0 # FPS of the User Interface (slider, buttons)
-# fps_rendering = 30.0 # FPS of the OSG rendering (useless above 60 FPS, limited by graphic hardware)
+# aspect_ratio_mode = 'auto'        # 'large' (force 16/9) or 'square' (force 1/1)
+# aspect_ratio = 16.0 / 9.0         # the aspect ratio of the osg view in 'auto' mode
+# osg_maximum_height_ratio = 0.5    # the maximum height ratio for the osg view on the screen
+# width_ratio = 0.4                 # the width ratio of jarvis on the screen
+# padding_bottom = 0                # an optional padding at the bottom
+# font_family = 'Monaco'            # the font to use for debug and errors
+# font_size = 12                    # the size of this font
+# hide_slider = False               # whether add the slider in the UI
+# wrap_text = False                 # whether wrap debug and error text
+# device_pixel_ratio = 1.0          # set this variable to 2.0 for retina displays
+# fps_ui = 30.0                     # FPS of the User Interface (slider, buttons)
+# fps_rendering = 30.0              # FPS of the OSG rendering (useless above 60 FPS, limited by graphic hardware)
 """
 
 default_config = {
-    'aspect_ratio': 16./9.,
+    'aspect_ratio_mode': 'auto',
+    'aspect_ratio': 16.0 / 9.0,
+    'osg_maximum_height_ratio': 0.5,
     'width_ratio': 0.4,
     'padding_bottom': 0,
     'font_family': 'Monaco',

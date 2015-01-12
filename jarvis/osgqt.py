@@ -65,6 +65,9 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.still_frame = True
         self.current_time = 0
         self.audio = None
+        self.viewer = None    
+        self.orginal_data = None
+        self.aspect_ratio = None
         self.fps_calculator = FPSCalculator(start_time=self.startTime, smoothness=30)
 
     def initializeGL (self):
@@ -121,7 +124,6 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         return viewer
 
     def resetCamera(self, viewer):
-
         camera = viewer.getCamera()
         camera.setComputeNearFarMode(False)
 #        camera = osg.Camera()
@@ -158,11 +160,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.camera = camera
 
 #        viewer.getCamera().setViewport(osg.Viewport(0,0, self.width(), self.height()))
- #       viewer.getCamera().addChild(camera)
+#        viewer.getCamera().addChild(camera)
         camera.setGraphicsContext(self.gw)
-
-    def heightForWidth(self, w):
-        return w / config.ASPECT_RATIO
 
     def texture_build(self):
         texture = osg.Texture2D()
@@ -216,8 +215,8 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def quad_create(self, texture):
         stateset = osg.StateSet()
         stateset.setTextureAttributeAndModes(0, texture)
-        corner = osg.Vec3(-config.ASPECT_RATIO, -1.0, 0)
-        width = osg.Vec3(2 * config.ASPECT_RATIO, 0, 0)
+        corner = osg.Vec3(-self.aspect_ratio, -1.0, 0)
+        width = osg.Vec3(2 * self.aspect_ratio, 0, 0)
         height = osg.Vec3(0, 2 * 1.0, 0)
         geom = osg.createTexturedQuadGeometry(corner, width, height, 0.0, 0.0, 1.0, 1.0)
         geom.setStateSet(stateset)
@@ -243,18 +242,17 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
 
     def resetSceneData(self, data):
         self.timer.stop()
-        if self.viewer == None:
-            return
-        self.viewer.setSceneData(None)
-        
+        if self.viewer is not None:
+            self.viewer.setSceneData(None)
         if self.audio is not None:
             self.audio.terminate()
             self.audio = None
 
     def setSceneData(self, data):
-        if data != None:
+        if data is not None:
             if self.viewer == None:
                 self.viewer = self.createViewer()
+            self.orginal_data = data
             data = self.build_wrapping_node(data)
             self.viewer.setSceneData(data)
 
@@ -277,11 +275,13 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def getosgviewer(self):
         return self.viewer
 
-    def resizeGL( self, w, h ):
-        if self.viewer == None:
-            return 
-        self.gw.resized(0,0,w,h)
-        self.resetCamera(self.viewer)
+    def resizeGL(self, w, h):
+        self.aspect_ratio = w / float(h)
+        self.parent.toolbar.aspect_ratio_btn_update()
+        if self.viewer is not None:
+            self.gw.resized(0, 0, w, h)
+            self.setSceneData(self.orginal_data)
+            self.resetCamera(self.viewer)
 
     def paintGL(self):
         if self.viewer == None:

@@ -4,6 +4,7 @@ import os
 import time
 import jarvis.client as client
 import osgqt
+import config
 
 def set_test_filename_function(test_filename_function):
     """Set the module.function that jarvis watches for changes and then executes."""
@@ -69,6 +70,12 @@ def debug_osg_set_loop_time(loop_time):
 
 def debug_osg_set_viewer_factory(factory):
     osgqt.setViewerFactory(factory)
+
+def set_aspect_ratio(aspect_ratio):
+    """ 'set_aspect_ratio' works only in 'auto' mode"""
+    config.ASPECT_RATIO = aspect_ratio
+    if jarvis.ml != None and jarvis.ml.display != None:
+        jarvis.ml.display.jarvismain.update_aspect_ratio()
 
 def testunit_result(result):
     for err in result.errors:

@@ -34,6 +34,7 @@ class MyTextEdit(QtGui.QTextEdit):
         super(MyTextEdit, self).keyPressEvent(event)
 
 class ToolBar(QtGui.QWidget):
+
     def __init__(self, father):
         QtGui.QWidget.__init__(self)
 
@@ -47,8 +48,8 @@ class ToolBar(QtGui.QWidget):
         bottom_bar = QtGui.QHBoxLayout()
         layout.addLayout(bottom_bar)
 
-        self.toogle_aspect_ratio = config.ASPECT_RATIO != 1.0
-        self.aspect_ratio_btn = QtGui.QPushButton('square' if config.ASPECT_RATIO != 1.0 else 'large', self)
+        self.aspect_ratio_btn = QtGui.QPushButton("AR mode")
+        self.aspect_ratio_btn_update()
         self.aspect_ratio_btn.clicked.connect(self.aspect_ratio_btn_clicked)
         bottom_bar.addWidget(self.aspect_ratio_btn)
 
@@ -95,15 +96,17 @@ class ToolBar(QtGui.QWidget):
         self.time_info.setText(txt)
 
     def aspect_ratio_btn_clicked(self):
-        if self.toogle_aspect_ratio:
-            config.ASPECT_RATIO = 1.0
-            self.father.update_aspect_ratio(config.ASPECT_RATIO)
-            self.aspect_ratio_btn.setText("large")
-        else:
-            config.ASPECT_RATIO = 16.0/9.0
-            self.father.update_aspect_ratio(config.ASPECT_RATIO)
-            self.aspect_ratio_btn.setText("square")
-        self.toogle_aspect_ratio = not self.toogle_aspect_ratio
+        ASPECT_RATIO_MODES = ["auto", "large", "square"]
+        mode_index = ASPECT_RATIO_MODES.index(config.ASPECT_RATIO_MODE)
+        mode_index = (mode_index + 1) % len(ASPECT_RATIO_MODES)
+        config.ASPECT_RATIO_MODE = ASPECT_RATIO_MODES[mode_index]
+        self.father.update_aspect_ratio()
+
+    def aspect_ratio_btn_update(self):
+        mode = config.ASPECT_RATIO_MODE
+        aspect_ratio = self.father.osgView.aspect_ratio
+        mode += (" (%.2f)" % aspect_ratio) if aspect_ratio is not None else " (?)"
+        self.aspect_ratio_btn.setText(mode)
 
     def play_btn_clicked(self):
         if self.toogle_play:
@@ -187,7 +190,7 @@ class JarvisMain(QtGui.QWidget):
             self.rightBox.addWidget(self.osgView, 0, Qt.AlignCenter)
             self.rightBox.addWidget(self.toolbar)
 
-        self.update_aspect_ratio(config.ASPECT_RATIO)
+        self.update_aspect_ratio()
 
         self.filename = None
         self.show()
@@ -201,7 +204,7 @@ class JarvisMain(QtGui.QWidget):
         elif key == QtCore.Qt.Key_Right:
             self.toolbar.right_btn_clicked()
 
-    def update_aspect_ratio(self, ratio):
+    def update_aspect_ratio(self):
         screen = QtGui.QDesktopWidget().screenGeometry()
         screen_width = screen.width() * config.DEVICE_PIXEL_RATIO
         screen_height = screen.height() * config.DEVICE_PIXEL_RATIO
@@ -211,8 +214,17 @@ class JarvisMain(QtGui.QWidget):
             0, width, screen_height - config.PADDING_BOTTOM
         )
         if self.osg_enable:
-            self.osgView.setMinimumWidth(width)
-            self.osgView.setMinimumHeight(width / ratio)
+            mode = config.ASPECT_RATIO_MODE
+            if mode == "auto":
+                aspect_ratio = config.ASPECT_RATIO
+            elif mode == "square":
+                aspect_ratio = 1.0
+            elif mode == "large":
+                aspect_ratio = 16. / 9.
+            osg_height = min(width / aspect_ratio, screen_height * config.OSG_MAXIMUM_HEIGHT_RATIO)
+            osg_width = osg_height * aspect_ratio
+            self.osgView.setMinimumSize(int(round(osg_width)), int(round(osg_height)))
+        self.toolbar.aspect_ratio_btn_update()
 
     def atomic_write(self, filename, text):
         f = open(filename + ".tmp", "w")
