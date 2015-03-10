@@ -69,6 +69,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         self.orginal_data = None
         self.aspect_ratio = None
         self.fps_calculator = FPSCalculator(start_time=self.startTime, smoothness=30)
+        self.size = None
 
     def initializeGL (self):
         """initializeGL the context and create the osgViewer, also set manipulator and event handler """
@@ -275,6 +276,21 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
     def getosgviewer(self):
         return self.viewer
 
+    def size():
+        def fget(self):
+            return self._size
+        def fset(self, value):
+            if value is None:
+                self._size = None
+            else:
+                width, height = value
+                width = int(round(width))
+                height = int(round(height))
+                self._size = (width, height)
+                self.setMinimumSize(width, height)
+        return locals()
+    size = property(**size())
+
     def resizeGL(self, w, h):
         self.aspect_ratio = w / float(h)
         self.parent.toolbar.aspect_ratio_btn_update()
@@ -309,7 +325,7 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
         fps = self.fps_calculator.get(frame_time)
         self.parent.toolbar.update_time_info(self.current_time, self.loopTime, fps)
         
-        self.viewer.frameAtTime(self.current_time)
+        self.viewer.frameAtTime(self.align_time(self.current_time))
 
     def align_time(self, t):
         return min(self.loopTime, max(0.0, round(t * config.FPS_UI) / config.FPS_UI))

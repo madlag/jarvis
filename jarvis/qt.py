@@ -223,7 +223,7 @@ class JarvisMain(QtGui.QWidget):
                 aspect_ratio = 16. / 9.
             osg_height = min(width / aspect_ratio, screen_height * config.OSG_MAXIMUM_HEIGHT_RATIO)
             osg_width = osg_height * aspect_ratio
-            self.osgView.setMinimumSize(int(round(osg_width)), int(round(osg_height)))
+            self.osgView.size = (osg_width, osg_height)
         self.toolbar.aspect_ratio_btn_update()
 
     def atomic_write(self, filename, text):
