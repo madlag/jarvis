@@ -89,6 +89,11 @@ def get_osg_viewer():
     if jarvis.ml != None and jarvis.ml.display != None:
         return jarvis.ml.display.getosgviewer()
 
+def get_osg_viewer_size():
+    if jarvis.ml != None and jarvis.ml.display != None:    
+        osg_view = jarvis.ml.display.jarvismain.osgView
+        return (osg_view.width(), osg_view.height())
+
 def add_watch_file(filename):
     if jarvis.ml != None:
         return jarvis.ml.add_watch_file(filename)
