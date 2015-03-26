@@ -87,6 +87,7 @@ class SoundPlayer(object):
         # sync init
         self.last_chunk_time_reference = None
         self.buffer_segments = []
+        self.in_call_back = False
 
         # state for starting
         self.will_be_playing = False
@@ -157,6 +158,7 @@ class SoundPlayer(object):
         return index / float(self.wavefile.getframerate())
 
     def _callback(self, in_data, frame_count, time_info, status):
+        self.in_call_back = True
         output_buffer_dac_time = time_info["output_buffer_dac_time"]
 
         # might be a good idea to lock/mutex buffer_segments
@@ -216,11 +218,12 @@ class SoundPlayer(object):
         else:
             # silent buffer
             data = self.empty_buffer
-            if not last_buffer_segment.is_incomplete:
+            if not last_buffer_segment.is_incomplete():
                 current_sample = self.wavefile.tell()
                 self.queue_segment(current_sample)
 
         self.last_chunk_time_reference = output_buffer_dac_time
+        self.in_call_back = False        
         return (data, pyaudio.paContinue)
 
     def clean_buffer_segments(self, nb_to_keep=1):
@@ -270,6 +273,10 @@ class SoundPlayer(object):
     is_playing = property(_is_playing)
 
     def get_time(self):
+        # get_time cannot return value during callback (buffer segments are changing)
+        while self.in_call_back:
+            time.sleep(0.01)
+
         if len(self.buffer_segments) == 0:
             return self._get_sample_time(self.wavefile.tell())
 
