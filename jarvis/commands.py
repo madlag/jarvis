@@ -2,7 +2,6 @@ import jarvis
 import inspect
 import os
 import time
-import jarvis.client as client
 import osgqt
 import config
 
@@ -35,17 +34,11 @@ def reset_start_time():
     global start_time
     start_time = time.time()
 
-def display_reset():
-    # TEMPORARY
-    client.Client().update("debug", "set", "")
-
 def debug(*args):
     msg = " ".join(map(lambda x : str(x), args))
 
     if jarvis.ml != None and jarvis.ml.display != None:
         jarvis.ml.display.debugprint(delta_time_format(), *args)
-
-#    print client.Client().update("debug", "append", msg + "<br/>")
 
 def debug_dir(object, filt = None):
     debug("debug_dir", object, filt)
