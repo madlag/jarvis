@@ -256,6 +256,12 @@ class PyQtOSGWidget(QtOpenGL.QGLWidget):
             self.orginal_data = data
             data = self.build_wrapping_node(data)
             self.viewer.setSceneData(data)
+            try:
+                # when working with conservative viewer
+                # to enable prefetch an release of image streams
+                self.viewer.optimizeTimeRanges()
+            except:
+                pass
 
         # ready to render
         self.fps_calculator.reset(self.startTime)
