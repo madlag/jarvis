@@ -147,7 +147,7 @@ class SoundPlayer(object):
 
         output_file_name = output_file_name
         print "Start ffmpeg conversion..."
-        subprocess.check_call([ "/usr/local/bin/ffmpeg", "-i", input_file_name] + parameters + [output_file_name])
+        subprocess.check_call(["ffmpeg", "-i", input_file_name] + parameters + [output_file_name])
         print "ffmpeg conversion OK"
         return output_file_name
 
