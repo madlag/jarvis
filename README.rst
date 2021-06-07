@@ -2,7 +2,7 @@ Jarvis: a python coding companion
 =================================
 
 .. _OpenSceneGraph: http://www.openscenegraph.org
-.. _`Jarvis Front Page`: http://madlag.github.com/jarvis/
+.. _`Jarvis Front Page`: http://madl.ag/jarvis/
 .. _`Bret Victor`: http://worrydream.com/ 
 .. _`Inventing on Principle`: http://www.youtube.com/watch?v=PUv66718DII
 .. _`Light Table`: http://www.kickstarter.com/projects/ibdknox/light-table
